@@ -1,0 +1,23 @@
+{
+  "launch_path": "index.html",
+  "default_locale": "en",
+  "activities": {
+    "dhis": {
+      "href": ".."
+    }
+  },
+  "appType": "APP",
+  "name": "group activities",
+  "version": "1.0.0",
+  "description": "group activities",
+  "icons": {
+    "16": "assets/icons/image001.png",
+    "48": "assets/icons/image001.png",
+    "128": "assets/icons/image001.png"
+  },
+  "developer": {
+    "name": "AICONNECT - 0777108323",
+    "url": "http://dhis2.org"
+  },
+  "manifest_generated_at": "Sun Sep 01 2024 17:31:08 GMT+0300 (East Africa Time)"
+}
