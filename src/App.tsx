@@ -13,16 +13,16 @@ export const App = observer(() => {
 
   return (
       <>
-          {/*<HeaderBar*/}
-          {/*    appName={"group activities"}*/}
-          {/*    style={{*/}
-          {/*        left: 0,*/}
-          {/*        position: "fixed",*/}
-          {/*        top: 0,*/}
-          {/*        width: "100%",*/}
-          {/*        zIndex: 1000,*/}
-          {/*    }}*/}
-          {/*/>*/}
+          <HeaderBar
+              appName={"group activities"}
+              style={{
+                  left: 0,
+                  position: "fixed",
+                  top: 0,
+                  width: "100%",
+                  zIndex: 1000,
+              }}
+          />
           <Router>
               <Switch>
                   <Route exact path="/">
