@@ -20,8 +20,8 @@ export async function getOrgUnitAbout(id: string) {
           name: event.dataValues[0].value,
           code: event.dataValues[1].value,
           directIndirect: event.dataValues[2].value,
-          sex: event.dataValues[3].value,
-          age: event.dataValues[4].value,
+          age: event.dataValues[3].value,
+          sex: event.dataValues[4].value,
         });
       }
       if (event.dataValues.length === 3) {

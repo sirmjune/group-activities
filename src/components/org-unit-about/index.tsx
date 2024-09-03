@@ -22,7 +22,6 @@ export function OrgUnitAbout() {
 
 function Component(props: { orgUnitId: string; detailsId: string }) {
   const { data } = useOrgUnitAbout(props.detailsId);
-
   return (
       <GroupActivitiesTable
           data={data?.groupActivities || []}
