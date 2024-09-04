@@ -14,7 +14,7 @@ export const App = observer(() => {
   return (
       <>
           <HeaderBar
-              appName={"group activities"}
+              appName={"Group Activities"}
               style={{
                   left: 0,
                   position: "fixed",

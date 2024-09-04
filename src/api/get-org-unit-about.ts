@@ -7,7 +7,8 @@ import {
 
 export async function getOrgUnitAbout(id: string) {
   const response = await axiosInstance.get<getOrgUnitAboutResponse>(
-    `/ovc/api/trackedEntityInstances/${id}.json?program=IXxHJADVCkb&fields=enrollments[events[event,dataValues[dataElement,value]]`
+    `${process.env.REACT_APP_BASE_URL}/ovc/api/trackedEntityInstances/${id}.json?program=IXxHJADVCkb&fields=enrollments[events[event,dataValues[dataElement,value]]`
+    // `/ovc/api/trackedEntityInstances/${id}.json?program=IXxHJADVCkb&fields=enrollments[events[event,dataValues[dataElement,value]]` //wth proxy
   );
 
   const sessions: Session[] = [];

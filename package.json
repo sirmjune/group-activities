@@ -1,8 +1,8 @@
 {
-  "name": "group-activities",
+  "name": "roup-activities",
   "version": "1.0.0",
   "private": true,
-  "proxy": "http://127.0.0.1:8080",
+  "proxy": "http://127.0.0.1:8080/",
   "homepage": ".",
   "cacheVersion": "1",
   "dependencies": {
@@ -86,7 +86,7 @@
   },
   "manifest.webapp": {
     "version": "1.0.0",
-    "name": "group activities",
+    "name": "Group Activities",
     "description": "group activities",
     "launch_path": "index.html",
     "appType": "APP",

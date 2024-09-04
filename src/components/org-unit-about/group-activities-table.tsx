@@ -28,10 +28,9 @@ export function GroupActivitiesTable(props: Props) {
         sex: '',
         age: ''
     }); // Add initial form data
-    // console.log("about data", props.data);
+    console.log("about data", props.data);
     const [message, setMessage] = useState(null); // State for success or error message
     const [isError, setIsError] = useState(false); // State to track if the message is an error
-
     const orgUnitId = props.orgUnitId;
     const table = useTable({
         data: props.data,
@@ -47,13 +46,16 @@ export function GroupActivitiesTable(props: Props) {
     // Function to fetch a new ID from the endpoint
     const fetchNewId = async () => {
         try {
-            const response = await fetch('https://ovckla.org/ovc/api/system/id?',{
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Basic ${credentials}`,
-                },
-            });
+            const response = await fetch(
+                `${process.env.REACT_APP_BASE_URL}/ovc/api/system/id?`,
+                // `/ovc/api/system/id?`, //with proxy
+                {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Basic ${credentials}`,
+                    },
+                });
             const data = await response.json();
             return data.codes[0];
         } catch (error) {
@@ -66,7 +68,7 @@ export function GroupActivitiesTable(props: Props) {
     // Function to handle form submission
     async function handleFormSubmit(event: React.FormEvent) {
         event.preventDefault();
-        console.log("formData", formData)
+        // console.log("formData", formData)
 
         // Fetch new ID for the event
         const newId = await fetchNewId();
@@ -74,7 +76,7 @@ export function GroupActivitiesTable(props: Props) {
             console.error('Failed to generate a new event ID');
             return;
         }
-        console.log("id", newId)
+        // console.log("id", newId)
 
         const enteredValues = {
             trackedEntityInstance: props.detailsId,
@@ -95,14 +97,17 @@ export function GroupActivitiesTable(props: Props) {
 
 
         try {
-            const response = await fetch('https://ovckla.org/ovc/api/events?', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Basic ${credentials}`,
-                },
-                body: JSON.stringify(enteredValues),
-            });
+            const response = await fetch(
+                `${process.env.REACT_APP_BASE_URL}/ovc/api/events?`,
+                // `/ovc/api/events?`, //wth proxy
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Basic ${credentials}`,
+                    },
+                    body: JSON.stringify(enteredValues),
+                });
 
             if (!response.ok) {
                 throw new Error('Failed to post data');
@@ -111,11 +116,11 @@ export function GroupActivitiesTable(props: Props) {
             // Hide the form after submission
             setFormVisible(false);
             setFormData({beneficiaryId: "", name: '', code: '', directIndirect: '', sex: '', age: ''}); // Reset form data
-            setMessage('Data successfully posted!');
+            setMessage('Data successfully saved!');
             setIsError(false);
         } catch (error) {
             console.error('Error posting data:', error);
-            setMessage('Error posting data. Please try again.');
+            setMessage('Error saving data. Please try again.');
             setIsError(true);
         }
 
@@ -131,10 +136,10 @@ export function GroupActivitiesTable(props: Props) {
         const enteredValue = formData.beneficiaryId;
         if (!enteredValue) return;
 
-        const credentials = btoa(`Skununka:Nomisr123$$$$}`);
-
         try {
-            const response = await fetch(`https://ovckla.org/ovc/api/trackedEntityInstances/query.json?ouMode=ACCESSIBLE&program=RDEklSXCD4C&attribute=HLKc2AKR9jW:EQ:${enteredValue}&paging=false`,
+            const response = await fetch(
+                `${process.env.REACT_APP_BASE_URL}/ovc/api/trackedEntityInstances/query.json?ouMode=ACCESSIBLE&program=RDEklSXCD4C&attribute=HLKc2AKR9jW:EQ:${enteredValue}&paging=false`,
+                // `/ovc/api/trackedEntityInstances/query.json?ouMode=ACCESSIBLE&program=RDEklSXCD4C&attribute=HLKc2AKR9jW:EQ:${enteredValue}&paging=false`, //with proxy
                 {
                     method: 'GET',
                     headers: {
@@ -268,7 +273,17 @@ export function GroupActivitiesTable(props: Props) {
                             </button>
                             <button
                                 type="button"
-                                onClick={() => setFormVisible(false)}
+                                onClick={() => {
+                                    setFormVisible(false);
+                                    setFormData({
+                                        beneficiaryId: '',
+                                        name: '',
+                                        code: '',
+                                        directIndirect: '',
+                                        sex: '',
+                                        age: ''
+                                    });
+                                }}
                                 className="cancel-button"
                             >
                                 Cancel
