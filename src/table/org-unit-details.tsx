@@ -1,6 +1,8 @@
 import { createColumnHelper } from '@tanstack/react-table';
 
 import { OrgUnitDetails } from '../types/org-unit-details';
+import React, {useState} from 'react';
+
 
 const columnHelper = createColumnHelper<OrgUnitDetails>();
 
@@ -40,4 +42,21 @@ export const orgUnitDetailsColumns = [
     cell: (info) => info.getValue(),
     header: () => 'Venue',
   }),
+  // Custom delete column
+  columnHelper.display({
+    id: 'delete', // This can be any string as it is a custom column
+    header: 'Delete',
+    cell: (info) => (
+        <button
+            onClick={() => {
+              const rowId = info.row.original.id;
+              // handleDelete(rowId);
+            }}
+            className="delete-button"
+        >
+          Delete
+        </button>
+    ),
+  }),
 ];
+

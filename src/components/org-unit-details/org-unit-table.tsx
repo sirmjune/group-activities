@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 
 import {Header} from '../header';
 import {Table, TablePagination} from '../common/table';
@@ -48,8 +48,40 @@ export function OrgUnitTable(props: Props) {
         setGlobalFilter: setSearch,
     });
 
+    const [trigger, setTrigger] = useState(0); // State to trigger useEffect
+    //fetch code
+    useEffect(() => {
+        const fetchCode = async () => {
+            try {
+                const response = await fetch(
+                    `${process.env.REACT_APP_BASE_URL}/ovc/api/trackedEntityAttributes/oqabsHE0ZUI/generate?ORG_UNIT_CODE=KM-01/KD-001`,
+                    // `/ovc/api/trackedEntityAttributes/oqabsHE0ZUI/generate?ORG_UNIT_CODE=KM-01/KD-001`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Basic ${credentials}`,
+                        },
+                    }
+                );
+                const data = await response.json();
+                if (data && data.value) {
+                    setFormData((prevFormData) => ({
+                        ...prevFormData,
+                        code: data.value,
+                    }));
+                }
+            } catch (error) {
+                console.error('Error fetching new code:', error);
+            }
+        };
+
+        fetchCode();
+    }, [trigger]);
+
     function onAdd() {
         setFormVisible(true);
+        setTrigger(prevTrigger => prevTrigger + 1);
     }
 
     const [selectedDate, setSelectedDate] = useState('');
@@ -170,6 +202,14 @@ export function OrgUnitTable(props: Props) {
                 {attribute: 'dqbuxC5GB1M', value: formData.activity},
                 {attribute: 'mWyp85xIzXR', value: formData.subGroup},
                 {attribute: 'oqabsHE0ZUI', value: formData.code}
+            ],
+            enrollments: [
+                {
+                    program: 'IXxHJADVCkb',
+                    orgUnit: props.orgUnitId,
+                    enrollmentDate: new Date().toISOString(),
+                    incidentDate: new Date().toISOString()
+                }
             ]
 
         }
@@ -278,14 +318,14 @@ export function OrgUnitTable(props: Props) {
                                 required
                             >
                                 <option value="">Select an option</option>
-                                <option value="VSLA Group">VSLA Group</option>
-                                <option value="Sinovuyo">Sinovuyo</option>
-                                <option value="Journeys Plus">Journeys Plus</option>
-                                <option value="NMN">NMN</option>
-                                <option value="Early Childhood Development(ECD)">Early Childhood Development(ECD)
+                                <option value="1. VSLA Group">VSLA Group</option>
+                                <option value="2. Sinovuyo">Sinovuyo</option>
+                                <option value="3. Journeys Plus">Journeys Plus</option>
+                                <option value="4. NMN">NMN</option>
+                                <option value="7. Early Childhood Development(ECD)">Early Childhood Development(ECD)
                                 </option>
-                                <option value="Stepping Stones">Stepping Stones</option>
-                                <option value="Other(Specify)">Other(Specify)</option>
+                                <option value="5. Stepping Stones">Stepping Stones</option>
+                                <option value="6. Other(Specify)">Other(Specify)</option>
                             </select>
 
                         </div>

@@ -5,28 +5,58 @@ const columnHelper = createColumnHelper<Session>();
 
 export const sessionsColumns = [
     columnHelper.accessor('code', {
-        cell: (info) => info.getValue(),
+        cell: (info) => info.getValue() || '',
         header: 'Code',
     }),
     columnHelper.accessor((row) => row.sessions[0], {
         id: 'sessionName1',
-        cell: (info) => info.getValue(),
+        cell: (info) => info.getValue() || '',
         header: 'Session 1 Name',
     }),
     columnHelper.accessor((row) => row.sessions[1], {
         id: 'sessionDate1',
-        cell: (info) => info.getValue(),
+        cell: (info) => info.getValue() || '',
         header: 'Session 1 Date',
     }),
     columnHelper.accessor((row) => row.sessions[2], {
         id: 'sessionName2',
-        cell: (info) => info.getValue(),
+        cell: (info) => info.getValue() || '',
         header: 'Session 2 Name',
     }),
     columnHelper.accessor((row) => row.sessions[3], {
         id: 'sessionDate2',
-        cell: (info) => info.getValue(),
+        cell: (info) => info.getValue() || '',
         header: 'Session 2 Date',
+    }),
+    columnHelper.accessor((row) => row.sessions[4], {
+        id: 'sessionName3',
+        cell: (info) => info.getValue() || '',
+        header: 'Session 3 Name',
+    }),
+    columnHelper.accessor((row) => row.sessions[5], {
+        id: 'sessionDate3',
+        cell: (info) => info.getValue() || '',
+        header: 'Session 3 Date',
+    }),
+    columnHelper.accessor((row) => row.sessions[6], {
+        id: 'sessionName4',
+        cell: (info) => info.getValue()  || '',
+        header: 'Session 4 Name',
+    }),
+    columnHelper.accessor((row) => row.sessions[7], {
+        id: 'sessionDate4',
+        cell: (info) => info.getValue() || '',
+        header: 'Session 4 Date',
+    }),
+    columnHelper.accessor((row) => row.sessions[8], {
+        id: 'sessionName5',
+        cell: (info) => info.getValue() || '',
+        header: 'Session 5 Name',
+    }),
+    columnHelper.accessor((row) => row.sessions[9], {
+        id: 'sessionDate5',
+        cell: (info) => info.getValue() || '',
+        header: 'Session 5 Date',
     }),
     // columnHelper.accessor((row) => row.sessions[4], {
     //     id: 'sessionName3',

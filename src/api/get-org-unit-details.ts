@@ -6,8 +6,8 @@ import axiosInstance from './base-api';
 
 export async function getOrgUnitDetails(id: string): Promise<OrgUnitDetails[]> {
   const response = await axiosInstance.get<GetOrgUnitDetailsResponse>(
-    `${process.env.REACT_APP_BASE_URL}/ovc/api/trackedEntityInstances/query.json?ou=${id}&ouMode=SELECTED&&order=created:desc&program=IXxHJADVCkb&pageSize=50&page=1&totalPages=false`
-    // `/ovc/api/trackedEntityInstances/query.json?ou=${id}&ouMode=SELECTED&&order=created:desc&program=IXxHJADVCkb&pageSize=50&page=1&totalPages=false`  //wth proxy
+    // `${process.env.REACT_APP_BASE_URL}/ovc/api/trackedEntityInstances/query.json?ou=${id}&ouMode=SELECTED&&order=created:desc&program=IXxHJADVCkb&paging=false`
+    `/ovc/api/trackedEntityInstances/query.json?ou=${id}&ouMode=SELECTED&&order=created:desc&program=IXxHJADVCkb&pageSize=50&page=1&totalPages=false`  //wth proxy
   );
   const rows = response.data.rows;
 

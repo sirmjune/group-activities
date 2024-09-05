@@ -92,9 +92,10 @@ export function SessionsTable(props: Props) {
             trackedEntityInstance: props.detailsId,
             orgUnit: props.orgUnitId,
             program: "IXxHJADVCkb",
-            programStage: "aTZwDRoJnxj",
+            programStage: "VzkQBBglj3O",
             eventDate: new Date().toISOString(),
             event: newId,
+            status:"COMPLETED",
 
             dataValues: [
                 {dataElement: 'ypDUCAS6juy', value: formData.code}, //direct
@@ -102,11 +103,12 @@ export function SessionsTable(props: Props) {
                 {dataElement: 'RECl06RNilT', value: selectedDate}, //name
             ]
         }
-console.log("ent",enteredValues)
+
+
         try {
             const response = await fetch(
-                `${process.env.REACT_APP_BASE_URL}/ovc/api/trackedEntityInstances?`,
-                // `/ovc/api/trackedEntityInstances?`, //wth proxy
+                `${process.env.REACT_APP_BASE_URL}/ovc/api/events?`,
+                // `/ovc/api/events?`,
                 {
                     method: 'POST',
                     headers: {
