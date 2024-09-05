@@ -11,6 +11,7 @@ export async function getOrgUnitAbout(id: string) {
     `/ovc/api/trackedEntityInstances/${id}.json?program=IXxHJADVCkb&fields=enrollments[events[event,dataValues[dataElement,value]]` //wth proxy
   );
 
+  console.log("response", response);
   const sessions: Session[] = [];
   const groupActivities: GroupActivities[] = [];
 
@@ -18,6 +19,7 @@ export async function getOrgUnitAbout(id: string) {
     enrollment.events.forEach((event) => {
       if (event.dataValues.length === 5) {
         groupActivities.push({
+          id: event.event,
           name: event.dataValues[0].value,
           code: event.dataValues[1].value,
           directIndirect: event.dataValues[2].value,
@@ -27,6 +29,7 @@ export async function getOrgUnitAbout(id: string) {
       }
       if (event.dataValues.length === 3) {
         sessions.push({
+          id: event.event,
           code: event.dataValues[0].value,
           sessions: [event.dataValues[1].value, event.dataValues[2].value],
         });
