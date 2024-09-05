@@ -19,6 +19,7 @@ export function OrgUnitTable(props: Props) {
     const [search, setSearch] = useState('');
     const history = useHistory();
     const [formVisible, setFormVisible] = useState(false);
+    const [trigger, setTrigger] = useState(0); // State to trigger useEffect
     const [userData, setUserData] = useState({
         username: '',
         surname: '',
@@ -43,19 +44,22 @@ export function OrgUnitTable(props: Props) {
 
     const table = useTable({
         data: props.orgUnitDetails,
-        columns: orgUnitDetailsColumns,
+        columns: orgUnitDetailsColumns(credentials, setMessage, setIsError),
         globalFilter: search,
         setGlobalFilter: setSearch,
     });
 
-    const [trigger, setTrigger] = useState(0); // State to trigger useEffect
-    //fetch code
+
+
+    const [orgUnitCode, setOrgUnitcode] = useState('');
+
     useEffect(() => {
-        const fetchCode = async () => {
+        const fetchData = async () => {
             try {
-                const response = await fetch(
-                    `${process.env.REACT_APP_BASE_URL}/ovc/api/trackedEntityAttributes/oqabsHE0ZUI/generate?ORG_UNIT_CODE=KM-01/KD-001`,
-                    // `/ovc/api/trackedEntityAttributes/oqabsHE0ZUI/generate?ORG_UNIT_CODE=KM-01/KD-001`,
+                // First request: Fetch the organization unit code
+                const orgUnitCodeResponse = await fetch(
+                    `${process.env.REACT_APP_BASE_URL}/ovc/api/organisationUnits/${props.orgUnitId}`,
+                    // `/ovc/api/organisationUnits/${props.orgUnitId}`,
                     {
                         method: 'GET',
                         headers: {
@@ -64,19 +68,41 @@ export function OrgUnitTable(props: Props) {
                         },
                     }
                 );
-                const data = await response.json();
-                if (data && data.value) {
-                    setFormData((prevFormData) => ({
-                        ...prevFormData,
-                        code: data.value,
-                    }));
+                const orgUnitCodeData = await orgUnitCodeResponse.json();
+                const orgUnitCode = orgUnitCodeData.code;
+                setOrgUnitcode(orgUnitCode);
+
+                // Wait for the orgUnitCode to be set before making the second request
+                if (orgUnitCode) {
+                    // Second request: Fetch the generated code using the organization unit code
+                    const codeResponse = await fetch(
+                        `${process.env.REACT_APP_BASE_URL}/ovc/api/trackedEntityAttributes/oqabsHE0ZUI/generate?ORG_UNIT_CODE=${orgUnitCode}`,
+                        // `/ovc/api/trackedEntityAttributes/oqabsHE0ZUI/generate?ORG_UNIT_CODE=${orgUnitCode}`,
+                        {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Basic ${credentials}`,
+                            },
+                        }
+                    );
+                    const codeData = await codeResponse.json();
+
+                    // If the response contains a value, update the formData
+                    if (codeData && codeData.value) {
+                        setFormData((prevFormData) => ({
+                            ...prevFormData,
+                            code: codeData.value,
+                        }));
+                    }
                 }
             } catch (error) {
-                console.error('Error fetching new code:', error);
+                console.error('Error fetching data:', error);
             }
         };
 
-        fetchCode();
+        fetchData();
+
     }, [trigger]);
 
     function onAdd() {

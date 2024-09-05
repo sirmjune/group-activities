@@ -1,9 +1,11 @@
 import { createColumnHelper } from '@tanstack/react-table';
 import { Session } from '../types/org-unit-about';
+import {deleteGroup} from "../components/org-unit-about/deleteGroup";
+import React from "react";
 
 const columnHelper = createColumnHelper<Session>();
 
-export const sessionsColumns = [
+export const sessionsColumns = (credentials: string, setMessage: any, setIsError: any) => [
     columnHelper.accessor('code', {
         cell: (info) => info.getValue() || '',
         header: 'Code',
@@ -58,6 +60,23 @@ export const sessionsColumns = [
         cell: (info) => info.getValue() || '',
         header: 'Session 5 Date',
     }),
+    // Custom delete column
+    // columnHelper.display({
+    //     id: 'delete', // This can be any string as it is a custom column
+    //     header: 'Delete',
+    //     cell: (info) => (
+    //         <button
+    //             onClick={(event) => {
+    //                 event.stopPropagation();  // Prevent row click event
+    //                 const rowId = info.row.original.id;
+    //                 deleteGroup(rowId, credentials, setMessage, setIsError)
+    //             }}
+    //             className="delete-button"
+    //         >
+    //             x
+    //         </button>
+    //     ),
+    // }),
     // columnHelper.accessor((row) => row.sessions[4], {
     //     id: 'sessionName3',
     //     cell: (info) => info.getValue() || '',  // Use empty string if value is undefined to avoid errors

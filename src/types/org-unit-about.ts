@@ -13,6 +13,7 @@ export interface DataValue {
 }
 
 export interface GroupActivities {
+  id: string,
   code: string;
   name: string;
   directIndirect: string;
@@ -21,6 +22,7 @@ export interface GroupActivities {
 }
 
 export interface Session {
+  id: string,
   code: string;
   sessions: string[];
 }

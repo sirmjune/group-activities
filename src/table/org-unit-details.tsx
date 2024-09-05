@@ -2,11 +2,12 @@ import { createColumnHelper } from '@tanstack/react-table';
 
 import { OrgUnitDetails } from '../types/org-unit-details';
 import React, {useState} from 'react';
+import {handleDelete} from "../components/org-unit-details/deleteRecord";
 
 
 const columnHelper = createColumnHelper<OrgUnitDetails>();
 
-export const orgUnitDetailsColumns = [
+export const orgUnitDetailsColumns =  (credentials: string, setMessage: any, setIsError: any) => [
   columnHelper.accessor('id', {
     id: 'id',
   }),
@@ -48,13 +49,14 @@ export const orgUnitDetailsColumns = [
     header: 'Delete',
     cell: (info) => (
         <button
-            onClick={() => {
+            onClick={(event) => {
+              event.stopPropagation();  // Prevent row click event
               const rowId = info.row.original.id;
-              // handleDelete(rowId);
+              handleDelete(rowId, credentials, setMessage, setIsError)
             }}
             className="delete-button"
         >
-          Delete
+          x
         </button>
     ),
   }),
