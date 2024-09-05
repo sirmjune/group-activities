@@ -34,7 +34,7 @@ export function GroupActivitiesTable(props: Props) {
     const orgUnitId = props.orgUnitId;
     const table = useTable({
         data: props.data,
-        columns: GroupActivitiesColumns,
+        columns: GroupActivitiesColumns(credentials, setMessage, setIsError),
         globalFilter: search,
         setGlobalFilter: setSearch,
     });
@@ -158,7 +158,7 @@ export function GroupActivitiesTable(props: Props) {
                     // Set form fields based on row data
                     code: row[8] || '',
                     name: row[11] || '',
-                    directIndirect: "Comprehensive" || '', //no field
+                    directIndirect: "Comprehensive" || 'Indirect', //no field
                     sex: row[12] || '',
                     age: row[9] || '',  //no age
                 }));

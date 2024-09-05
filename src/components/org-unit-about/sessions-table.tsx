@@ -32,7 +32,7 @@ export function SessionsTable(props: Props) {
     const [isError, setIsError] = useState(false);
     const table = useTable({
         data: props.data,
-        columns: sessionsColumns,
+        columns: sessionsColumns(credentials, setMessage, setIsError),
         globalFilter: search,
         setGlobalFilter: setSearch,
     });
