@@ -7,8 +7,8 @@ import {
 
 export async function getOrgUnitAbout(id: string) {
   const response = await axiosInstance.get<getOrgUnitAboutResponse>(
-    // `${process.env.REACT_APP_BASE_URL}/ovc/api/trackedEntityInstances/${id}.json?program=IXxHJADVCkb&fields=enrollments[events[event,dataValues[dataElement,value]]`
-    `/ovc/api/trackedEntityInstances/${id}.json?program=IXxHJADVCkb&fields=enrollments[events[event,dataValues[dataElement,value]]` //wth proxy
+    `${process.env.REACT_APP_BASE_URL}/ovc/api/trackedEntityInstances/${id}.json?program=IXxHJADVCkb&fields=enrollments[events[event,dataValues[dataElement,value]]`
+    // `/ovc/api/trackedEntityInstances/${id}.json?program=IXxHJADVCkb&fields=enrollments[events[event,dataValues[dataElement,value]]` //wth proxy
   );
 
   console.log("response", response);
@@ -29,9 +29,10 @@ export async function getOrgUnitAbout(id: string) {
       }
       if (event.dataValues.length === 3) {
         sessions.push({
+          age: "", sex: "",
           id: event.event,
           code: event.dataValues[0].value,
-          sessions: [event.dataValues[1].value, event.dataValues[2].value],
+          sessions: [event.dataValues[1].value, event.dataValues[2].value]
         });
       }
     });
@@ -47,6 +48,22 @@ export async function getOrgUnitAbout(id: string) {
       existingSession.sessions.push(...session.sessions);
     } else {
       groupedSessions.push(session);
+    }
+  });
+
+  // adding sex and age to the sessions array
+  // Create a Map for fast lookup
+  const groupActivitiesMap = new Map<string, { age: string, sex: string }>();
+  groupActivities.forEach(activity => {
+    groupActivitiesMap.set(activity.code, { age: activity.age, sex: activity.sex });
+  });
+
+  // Update sessions with age and sex
+  sessions.forEach(session => {
+    const groupActivity = groupActivitiesMap.get(session.code);
+    if (groupActivity) {
+      session.age = groupActivity.age;
+      session.sex = groupActivity.sex;
     }
   });
 

@@ -1,13 +1,12 @@
+import React from 'react';
 import {useState} from 'react';
-
 import {Link} from 'react-router-dom';
-
 import {Table, TablePagination} from '../common/table';
 import {Header} from '../header';
 import {useTable} from '../../hooks/use-table';
 import {Session} from '../../types/org-unit-about';
 import {sessionsColumns} from '../../table/sessions';
-import React from 'react';
+
 
 type Props = {
     data: Session[];
@@ -18,9 +17,14 @@ type Props = {
 export function SessionsTable(props: Props) {
     const credentials = btoa(`Skununka:Nomisr123$$$$}`);
     const [search, setSearch] = useState('');
-// console.log("sessionsTable",props.data);
+    console.log("sessionsTable", props.data);
+
+
+    const [searchCode, setSearchCode] = useState('');
+    const [searchSession, setSearchSession] = useState('');
     const [formVisible, setFormVisible] = useState(false);
     const codes = props.data.map((item) => item.code);
+    const [loading, setLoading] = useState(false);
 
     const [formData, setFormData] = useState({
         code: codes.length > 0 ? codes[0] : '',
@@ -37,6 +41,23 @@ export function SessionsTable(props: Props) {
         setGlobalFilter: setSearch,
     });
 
+    const sessions = [  // Replace with your actual sessions
+        "Introducing the program and defining goals",
+        "Building a positive relationship thru",
+        "Talking about emotions",
+        "Managing anger & solving problems",
+        "Problem solving-putting out the fire spending time together",
+    ];
+
+
+    // Filtered codes and sessions based on search input
+    const filteredCodes = codes.filter(code =>
+        code.toLowerCase().includes(searchCode.toLowerCase())
+    );
+
+    const filteredSessions = sessions.filter(session =>
+        session.toLowerCase().includes(searchSession.toLowerCase())
+    );
 
     function onAdd() {
         setFormVisible(true);
@@ -79,11 +100,13 @@ export function SessionsTable(props: Props) {
     async function handleFormSubmit(event: React.FormEvent) {
         event.preventDefault();
         // console.log("formData", formData)
-
+        setLoading(true);
 
         const newId = await fetchNewId();
         if (!newId) {
             console.error('Failed to generate a new event ID');
+            setLoading(false);
+            setMessage('Failed to generate a new event ID.');
             return;
         }
         // console.log("id", newId)
@@ -95,7 +118,7 @@ export function SessionsTable(props: Props) {
             programStage: "VzkQBBglj3O",
             eventDate: new Date().toISOString(),
             event: newId,
-            status:"COMPLETED",
+            status: "COMPLETED",
 
             dataValues: [
                 {dataElement: 'ypDUCAS6juy', value: formData.code}, //direct
@@ -123,12 +146,9 @@ export function SessionsTable(props: Props) {
             }
 
             // Hide the form after submission
-            setFormVisible(false);
-            setFormData({
-                code: "",
-                session: "",
-                sessionDate: "",
-            }); // Reset form data
+            // setFormVisible(false);
+            setFormData({code: "", session: "", sessionDate: ""}); // Reset form data
+            setSelectedDate('');
             setMessage('Data successfully saved!');
             setIsError(false);
         } catch (error) {
@@ -136,7 +156,7 @@ export function SessionsTable(props: Props) {
             setMessage('Error saving data. Please try again.');
             setIsError(true);
         }
-
+        setLoading(false);
     }
 
     return (
@@ -153,6 +173,13 @@ export function SessionsTable(props: Props) {
                     </Link>
                 }
             />
+            {loading && <div className="mt-4">
+                <div className="loader-container">
+                    <div className="spinner"></div>
+                    <p>Saving Entry...</p>
+                </div>
+            </div>}
+
             {message && (
                 <div className={isError ? 'error-message' : 'success-message'}>
                     {message}
@@ -163,15 +190,55 @@ export function SessionsTable(props: Props) {
                 <div className="form-container">
                     <form onSubmit={handleFormSubmit} className="form">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700"> Code</label>
-                            <select name="code" value={formData.code} onChange={handleInputChange}>
-                                {codes.map((code, index) => (
+                            <label className="block text-sm font-medium text-gray-700">Search Code</label>
+                            <input
+                                type="text"
+                                value={searchCode}
+                                onChange={(e) => setSearchCode(e.target.value)}
+                                className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                                placeholder="Search Code..."
+                            />
+                        </div>
+                        {/* Code Selection */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Code</label>
+                            <select
+                                name="code"
+                                value={formData.code}
+                                onChange={handleInputChange}
+                                className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                                required
+                            >
+                                {filteredCodes.map((code, index) => (
                                     <option key={index} value={code}>
                                         {code}
                                     </option>
                                 ))}
                             </select>
                         </div>
+                        {/*<div>*/}
+                        {/*    <label className="block text-sm font-medium text-gray-700"> Code</label>*/}
+                        {/*    <select name="code" value={formData.code} onChange={handleInputChange}>*/}
+                        {/*        {codes.map((code, index) => (*/}
+                        {/*            <option key={index} value={code}>*/}
+                        {/*                {code}*/}
+                        {/*            </option>*/}
+                        {/*        ))}*/}
+                        {/*    </select>*/}
+                        {/*</div>*/}
+
+                        {/* Session Search */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Search Session</label>
+                            <input
+                                type="text"
+                                value={searchSession}
+                                onChange={(e) => setSearchSession(e.target.value)}
+                                className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                                placeholder="Search Session..."
+                            />
+                        </div>
+
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Session</label>
                             <select
@@ -182,63 +249,126 @@ export function SessionsTable(props: Props) {
                                 required
                             >
                                 <option value="">Select an option</option>
-                                <option value="Introducing the program and defining goals">Introducing the program and defining goals</option>
-                                <option value="Building a positive relationship thru">Building a positive relationship thru</option>
-                                <option value="Talking about emotions">Talking about emotions</option>
-                                <option value="Managing anger & solving problems">Managing anger & solving problems</option>
-                                <option value="Problem solving-putting out the fire spending time together">Problem solving-putting out the fire spending time together</option>
-                                <option value="Problem solving-putting out the fire spending time">Problem solving-putting out the fire spending time</option>
-                                <option value="Motivation to save and making a budget">Motivation to save and making a budget</option>
-                                <option value="Dealing with problems without Conflict-I">Dealing with problems without Conflict-I</option>
-                                <option value="Dealing with problems without conflict-II">Dealing with problems without conflict-II</option>
-                                <option value=" Establishing family rules and routines"> Establishing family rules and routines</option>
-                                <option value="Understanding the ways to save and the risk to borrow">Understanding the ways to save and the risk to borrow</option>
-                                <option value="Keeping safe in the community">Keeping safe in the community</option>
-                                <option value="Responding to crisis">Responding to crisis</option>
-                                <option value="Widening the circle of support">Widening the circle of support</option>
-                                <option value="VSLA concepts">VSLA concepts</option>
-                                <option value="Leadership and Elections of the Management committee">Leadership and Elections of the Management committee</option>
-                                <option value="Leadership and Elections of the Management committee">Leadership and Elections of the Management committee</option>
-                                <option value="Introduction to written record keeping">Introduction to written record keeping</option>
-                                <option value="Meeting procedures/ meeting steps">Meeting procedures/ meeting steps</option>
-                                <option value="Conflict resolution">Conflict resolution</option>
-                                <option value="Share-out & Action audit">Share-out & Action audit</option>
-                                <option value="TOT on VSLA methodology">TOT on VSLA methodology</option>
-                                <option value="Financial Literacy and Bank Linkage">Financial Literacy and Bank Linkage</option>
-                                <option value="Selection Planning and Management of IGAs">Selection Planning and Management of IGAs</option>
-                                <option value="Module1: Saving">Module1: Saving</option>
-                                <option value="Module2: Debt">Module2: Debt</option>
-                                <option value="Module3: Budgeting">Module3: Budgeting</option>
-                                <option value="Rating of Mature groups for Bank linkage">Rating of Mature groups for Bank linkage</option>
-                                <option value="Sensitization on linkage banking">Sensitization on linkage banking</option>
-                                <option value="Account opening process">Account opening process</option>
-                                <option value="Monitoring the performance of Linked groups">Monitoring the performance of Linked groups</option>
-                                <option value="IGA selection process">IGA selection process</option>
-                                <option value="Market assessment">Market assessment</option>
-                                <option value="Knowledge and skills">Knowledge and skills</option>
-                                <option value="Estimation of start-up and working costs"> Estimation of start-up and working costs</option>
-                                <option value="Estimating sales and Income">Estimating sales and Income</option>
-                                <option value="Weekly expenses and Weekly income">Weekly expenses and Weekly income</option>
-                                <option value="Actual IGA Selection">Actual IGA Selection</option>
-                                <option value="IGA planning">IGA planning</option>
-                                <option value="IGA management">IGA management</option>
-                                <option value="Pupil to pupil Relationships">Pupil to pupil Relationships</option>
-                                <option value="Teacher to pupil Relationships">Teacher to pupil Relationships</option>
-                                <option value="Resisting negative peer pressure">Resisting negative peer pressure</option>
-                                <option value="HIV/AIDS, STI, Truth and Myths">HIV/AIDS, STI, Truth and Myths</option>
-                                <option value="HIV Transmission">HIV Transmission</option>
-                                <option value="Stigma and Discrimination">Stigma and Discrimination</option>
-                                <option value="Gender and HIV">Gender and HIV</option>
-                                <option value="Teenage Pregnancy">Teenage Pregnancy</option>
-                                <option value="The 4Cs and meaning of consents">The 4Cs and meaning of consents</option>
-                                <option value="Power and Consent">Power and Consent</option>
-                                <option value="HIV & School Related Gender Based Violence (SRGBV) risk and protection">HIV & School Related Gender Based Violence (SRGBV) risk and protection</option>
-                                <option value="HIV & School Related GBV risk and protection">HIV & School Related GBV risk and protection</option>
-                                <option value="Positive bystander response to violence"> Positive bystander response to violence</option>
+                                {filteredSessions.map((session, index) => (
+                                    <option key={index} value={session}>
+                                        {session}
+                                    </option>
+                                ))}
                             </select>
-
-
                         </div>
+                        {/*<div>*/}
+                        {/*    <label className="block text-sm font-medium text-gray-700">Session</label>*/}
+                        {/*    <select*/}
+                        {/*        name="session"*/}
+                        {/*        value={formData.session}*/}
+                        {/*        onChange={handleInputChange}*/}
+                        {/*        className="mt-1 block w-full border border-gray-300 rounded-md p-2"*/}
+                        {/*        required*/}
+                        {/*    >*/}
+                        {/*        <option value="">Select an option</option>*/}
+                        {/*        <option value="Introducing the program and defining goals">Introducing the program and*/}
+                        {/*            defining goals*/}
+                        {/*        </option>*/}
+                        {/*        <option value="Building a positive relationship thru">Building a positive relationship*/}
+                        {/*            thru*/}
+                        {/*        </option>*/}
+                        {/*        <option value="Talking about emotions">Talking about emotions</option>*/}
+                        {/*        <option value="Managing anger & solving problems">Managing anger & solving problems*/}
+                        {/*        </option>*/}
+                        {/*        <option value="Problem solving-putting out the fire spending time together">Problem*/}
+                        {/*            solving-putting out the fire spending time together*/}
+                        {/*        </option>*/}
+                        {/*        <option value="Problem solving-putting out the fire spending time">Problem*/}
+                        {/*            solving-putting out the fire spending time*/}
+                        {/*        </option>*/}
+                        {/*        <option value="Motivation to save and making a budget">Motivation to save and making a*/}
+                        {/*            budget*/}
+                        {/*        </option>*/}
+                        {/*        <option value="Dealing with problems without Conflict-I">Dealing with problems without*/}
+                        {/*            Conflict-I*/}
+                        {/*        </option>*/}
+                        {/*        <option value="Dealing with problems without conflict-II">Dealing with problems without*/}
+                        {/*            conflict-II*/}
+                        {/*        </option>*/}
+                        {/*        <option value=" Establishing family rules and routines"> Establishing family rules and*/}
+                        {/*            routines*/}
+                        {/*        </option>*/}
+                        {/*        <option value="Understanding the ways to save and the risk to borrow">Understanding the*/}
+                        {/*            ways to save and the risk to borrow*/}
+                        {/*        </option>*/}
+                        {/*        <option value="Keeping safe in the community">Keeping safe in the community</option>*/}
+                        {/*        <option value="Responding to crisis">Responding to crisis</option>*/}
+                        {/*        <option value="Widening the circle of support">Widening the circle of support</option>*/}
+                        {/*        <option value="VSLA concepts">VSLA concepts</option>*/}
+                        {/*        <option value="Leadership and Elections of the Management committee">Leadership and*/}
+                        {/*            Elections of the Management committee*/}
+                        {/*        </option>*/}
+                        {/*        <option value="Leadership and Elections of the Management committee">Leadership and*/}
+                        {/*            Elections of the Management committee*/}
+                        {/*        </option>*/}
+                        {/*        <option value="Introduction to written record keeping">Introduction to written record*/}
+                        {/*            keeping*/}
+                        {/*        </option>*/}
+                        {/*        <option value="Meeting procedures/ meeting steps">Meeting procedures/ meeting steps*/}
+                        {/*        </option>*/}
+                        {/*        <option value="Conflict resolution">Conflict resolution</option>*/}
+                        {/*        <option value="Share-out & Action audit">Share-out & Action audit</option>*/}
+                        {/*        <option value="TOT on VSLA methodology">TOT on VSLA methodology</option>*/}
+                        {/*        <option value="Financial Literacy and Bank Linkage">Financial Literacy and Bank*/}
+                        {/*            Linkage*/}
+                        {/*        </option>*/}
+                        {/*        <option value="Selection Planning and Management of IGAs">Selection Planning and*/}
+                        {/*            Management of IGAs*/}
+                        {/*        </option>*/}
+                        {/*        <option value="Module1: Saving">Module1: Saving</option>*/}
+                        {/*        <option value="Module2: Debt">Module2: Debt</option>*/}
+                        {/*        <option value="Module3: Budgeting">Module3: Budgeting</option>*/}
+                        {/*        <option value="Rating of Mature groups for Bank linkage">Rating of Mature groups for*/}
+                        {/*            Bank linkage*/}
+                        {/*        </option>*/}
+                        {/*        <option value="Sensitization on linkage banking">Sensitization on linkage banking*/}
+                        {/*        </option>*/}
+                        {/*        <option value="Account opening process">Account opening process</option>*/}
+                        {/*        <option value="Monitoring the performance of Linked groups">Monitoring the performance*/}
+                        {/*            of Linked groups*/}
+                        {/*        </option>*/}
+                        {/*        <option value="IGA selection process">IGA selection process</option>*/}
+                        {/*        <option value="Market assessment">Market assessment</option>*/}
+                        {/*        <option value="Knowledge and skills">Knowledge and skills</option>*/}
+                        {/*        <option value="Estimation of start-up and working costs"> Estimation of start-up and*/}
+                        {/*            working costs*/}
+                        {/*        </option>*/}
+                        {/*        <option value="Estimating sales and Income">Estimating sales and Income</option>*/}
+                        {/*        <option value="Weekly expenses and Weekly income">Weekly expenses and Weekly income*/}
+                        {/*        </option>*/}
+                        {/*        <option value="Actual IGA Selection">Actual IGA Selection</option>*/}
+                        {/*        <option value="IGA planning">IGA planning</option>*/}
+                        {/*        <option value="IGA management">IGA management</option>*/}
+                        {/*        <option value="Pupil to pupil Relationships">Pupil to pupil Relationships</option>*/}
+                        {/*        <option value="Teacher to pupil Relationships">Teacher to pupil Relationships</option>*/}
+                        {/*        <option value="Resisting negative peer pressure">Resisting negative peer pressure*/}
+                        {/*        </option>*/}
+                        {/*        <option value="HIV/AIDS, STI, Truth and Myths">HIV/AIDS, STI, Truth and Myths</option>*/}
+                        {/*        <option value="HIV Transmission">HIV Transmission</option>*/}
+                        {/*        <option value="Stigma and Discrimination">Stigma and Discrimination</option>*/}
+                        {/*        <option value="Gender and HIV">Gender and HIV</option>*/}
+                        {/*        <option value="Teenage Pregnancy">Teenage Pregnancy</option>*/}
+                        {/*        <option value="The 4Cs and meaning of consents">The 4Cs and meaning of consents</option>*/}
+                        {/*        <option value="Power and Consent">Power and Consent</option>*/}
+                        {/*        <option*/}
+                        {/*            value="HIV & School Related Gender Based Violence (SRGBV) risk and protection">HIV &*/}
+                        {/*            School Related Gender Based Violence (SRGBV) risk and protection*/}
+                        {/*        </option>*/}
+                        {/*        <option value="HIV & School Related GBV risk and protection">HIV & School Related GBV*/}
+                        {/*            risk and protection*/}
+                        {/*        </option>*/}
+                        {/*        <option value="Positive bystander response to violence"> Positive bystander response to*/}
+                        {/*            violence*/}
+                        {/*        </option>*/}
+                        {/*    </select>*/}
+
+
+                        {/*</div>*/}
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Session Date</label>
                             <input
@@ -253,7 +383,7 @@ export function SessionsTable(props: Props) {
 
                         <div className="button-container">
                             <button type="submit" className="submit-button">
-                                Save
+                                Save & Continue
                             </button>
                             <button
                                 type="button"
@@ -266,7 +396,7 @@ export function SessionsTable(props: Props) {
                                 }}
                                 className="cancel-button"
                             >
-                                Cancel
+                                Close
                             </button>
                         </div>
                     </form>

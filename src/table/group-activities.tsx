@@ -9,7 +9,7 @@ const columnHelper = createColumnHelper<GroupActivities>();
 export const GroupActivitiesColumns =  (credentials: string, setMessage: any, setIsError: any) => [
   columnHelper.accessor('directIndirect', {
     cell: (info) => info.getValue(),
-    header: () => 'Direct/Indirect',
+    header: () => 'Beneficiary type',
   }),
   // columnHelper.accessor('beneficiaryType', {
   //   cell: (info) => info.getValue(),

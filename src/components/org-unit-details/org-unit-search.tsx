@@ -3,12 +3,13 @@ import { useHistory } from 'react-router-dom';
 import { IOrgUnit } from '../../types/org-unit';
 import { getOrgUnits } from '../../api/get-org-units';
 import React from 'react';
-import '../org-unit-search/OrgUnitSearch.css';  // Import the CSS file
+import '../org-unit-search/OrgUnitSearch.css';
 
 export function OrgUnitSearch() {
     const [search, setSearch] = useState('');
     const [orgUnits, setOrgUnits] = useState<IOrgUnit[]>([]);
     const history = useHistory();
+
 
     return (
         <header className="org-unit-search-header">
@@ -30,6 +31,7 @@ export function OrgUnitSearch() {
                 {orgUnits.map((orgUnit) => (
                     <li
                         onClick={() => {
+                            setSearch(orgUnit.displayName);
                             history.push(`/${orgUnit.id}`);
                             setOrgUnits([]);
                         }}

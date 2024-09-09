@@ -25,4 +25,7 @@ export interface Session {
   id: string,
   code: string;
   sessions: string[];
+  age: string;
+  sex: string;
+
 }

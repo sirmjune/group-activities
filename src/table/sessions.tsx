@@ -1,7 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table';
 import { Session } from '../types/org-unit-about';
-import {deleteGroup} from "../components/org-unit-about/deleteGroup";
-import React from "react";
+
+
 
 const columnHelper = createColumnHelper<Session>();
 
@@ -9,6 +9,17 @@ export const sessionsColumns = (credentials: string, setMessage: any, setIsError
     columnHelper.accessor('code', {
         cell: (info) => info.getValue() || '',
         header: 'Code',
+        meta: { className: 'sticky-col-left' },
+    }),
+    columnHelper.accessor('age', {
+        cell: (info) => info.getValue() || '',
+        header: 'Age',
+        meta: { className: 'sticky-col-left' },
+    }),
+    columnHelper.accessor('sex', {
+        cell: (info) => info.getValue() || '',
+        header: 'Sex',
+        meta: { className: 'sticky-col-left' },
     }),
     columnHelper.accessor((row) => row.sessions[0], {
         id: 'sessionName1',

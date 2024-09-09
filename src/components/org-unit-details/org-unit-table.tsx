@@ -20,6 +20,7 @@ export function OrgUnitTable(props: Props) {
     const history = useHistory();
     const [formVisible, setFormVisible] = useState(false);
     const [trigger, setTrigger] = useState(0); // State to trigger useEffect
+    const [isLoading, setIsLoading] = useState(false); // loader for getting code
     const [userData, setUserData] = useState({
         username: '',
         surname: '',
@@ -41,7 +42,8 @@ export function OrgUnitTable(props: Props) {
     // console.log("orgUnitDetails", props.orgUnitDetails);
     const [message, setMessage] = useState(null); // State for success or error message
     const [isError, setIsError] = useState(false); // State to track if the message is an error
-
+    const [loading, setLoading] = useState(false); //loader for saving entry
+    const [orgUnitCode, setOrgUnitcode] = useState('');
     const table = useTable({
         data: props.orgUnitDetails,
         columns: orgUnitDetailsColumns(credentials, setMessage, setIsError),
@@ -50,11 +52,56 @@ export function OrgUnitTable(props: Props) {
     });
 
 
+    // Options for the "Sub Group" dropdown based on the "Group Type"
+    const getSubGroupOptions = () => {
+        switch (formData.groupType) {
+            case '1. VSLA Group':
+                return [
+                    {value: 'Group VSLA methodology sessions ', label: 'Group VSLA methodology sessions'},
+                    {value: 'VSLA monitoring & Support supervision ', label: 'VSLA monitoring & Support supervision'},
+                    {value: 'VSLA saving and borrowing ', label: 'VSLA saving and borrowing'},
+                    {value: 'VSLA TOT/ Refresher', label: 'VSLA TOT/ Refresher'}
+                ];
+            case '2. Sinovuyo':
+                return [
+                    {value: 'SINOVUYO SESSIONS ', label: 'SINOVUYO SESSIONS '},
+                ];
+            case '3. ECD':
+                return [
+                    {value: 'Early Childhood Development Sessions', label: 'Early Childhood Development Sessions'}
+                ];
+            case '4. AFLATEEN':
+                return [
+                    {value: 'AFLATEEN ', label: 'AFLATEEN '},
+                ];
+            case '5. NMN':
+                return [
+                    {value: 'No means No sessions (Boys)', label: 'No means No sessions (Boys)'},
+                    {value: 'No means No sessions (Girls)', label: 'No means No sessions (Girls)'}
+                ];
+            case '6. Financial Literacy':
+                return [
+                    {value: 'Financial Literacy', label: 'Financial Literacy'},
+                    {value: 'Bank Linkages', label: 'Bank Linkages'},
+                ];
+            case '7. SPM':
+                return [
+                    {value: 'SPM Training Sessions', label: 'SPM Training Sessions'}
+                ];
+            case '8. Work Readiness':
+                return [
+                    {value: 'Work Readiness Assessment', label: 'Work Readiness Assessment'}
+                ];
+            default:
+                return [];
+        }
+    };
 
-    const [orgUnitCode, setOrgUnitcode] = useState('');
 
     useEffect(() => {
         const fetchData = async () => {
+            setIsLoading(true);
+
             try {
                 // First request: Fetch the organization unit code
                 const orgUnitCodeResponse = await fetch(
@@ -98,6 +145,8 @@ export function OrgUnitTable(props: Props) {
                 }
             } catch (error) {
                 console.error('Error fetching data:', error);
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -171,11 +220,14 @@ export function OrgUnitTable(props: Props) {
     async function handleFormSubmit(event: React.FormEvent) {
         event.preventDefault();
         // console.log("formData", formData)
+        setLoading(true);
 
         // Fetch new ID for the event
         const newId = await fetchNewId();
         if (!newId) {
-            console.error('Failed to generate a new trackedEntityInstance ID');
+            console.error('Failed to generate a new trackedEntityInstance ID.');
+            setLoading(false);
+            setMessage('Failed to generate a new trackedEntityInstance ID.');
             return;
         }
         // console.log("id", newId)
@@ -183,7 +235,9 @@ export function OrgUnitTable(props: Props) {
         // Fetch new ID for the event
         const userData = await fetchUser();
         if (!userData) {
-            console.error('Failed to get username');
+            console.error('Failed to get username.');
+            setLoading(false);
+            setMessage('Failed to get username.');
             return;
         }
 
@@ -259,7 +313,6 @@ export function OrgUnitTable(props: Props) {
             }
 
             // Hide the form after submission
-            setFormVisible(false);
             setFormData({
                 name: '',
                 code: '',
@@ -272,6 +325,7 @@ export function OrgUnitTable(props: Props) {
                 dateOfActivity: '',
                 venue: ''
             }); // Reset form data
+            setSelectedDate('');
             setMessage('Data successfully saved!');
             setIsError(false);
         } catch (error) {
@@ -279,7 +333,7 @@ export function OrgUnitTable(props: Props) {
             setMessage('Error saving data. Please try again.');
             setIsError(true);
         }
-
+        setLoading(false);
     }
 
     function handleInputChange(event) {
@@ -292,6 +346,14 @@ export function OrgUnitTable(props: Props) {
         <main className="space-y-4">
             <Header onAdd={onAdd} search={search} onSearch={setSearch}/>
 
+            {/*looader for saving entry*/}
+            {loading && <div className="mt-4">
+                <div className="loader-container">
+                    <div className="spinner"></div>
+                    <p>Saving Entry...</p>
+                </div>
+            </div>}
+
             {message && (
                 <div className={isError ? 'error-message' : 'success-message'}>
                     {message}
@@ -301,38 +363,38 @@ export function OrgUnitTable(props: Props) {
             {formVisible && (
                 <div className="form-container">
                     <form onSubmit={handleFormSubmit} className="form">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Code</label>
-                            <input
-                                type="text"
-                                name="code"
-                                value={formData.code}
-                                onChange={handleInputChange}
-                                className="mt-1 block w-full border border-gray-300 rounded-md p-2"
-                                required
-                            />
-                        </div>
+                       {/*loader for getting code*/}
+                        {isLoading ? (
+                            <div className="mt-4">
+                                <div className="loader-container">
+                                    <div className="spinner"></div>
+                                    <p>Loading code, please wait...</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Code</label>
+                                <input
+                                    type="text"
+                                    name="code"
+                                    value={formData.code}
+                                    onChange={handleInputChange}
+                                    className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                                    required
+                                />
+                            </div>
+                        )}
+
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Name of CSO/Partner</label>
-                            <select
+                            <input
+                                type="text"
                                 name="name"
-                                value={formData.name}
-                                onChange={handleInputChange}
+                                value="ROM"
                                 className="mt-1 block w-full border border-gray-300 rounded-md p-2"
                                 required
-                            >
-                                <option value="">Select an option</option>
-                                <option value="ACORD">ACORD</option>
-                                <option value="IDI">IDI</option>
-                                <option value="UWESO">UWESO</option>
-                                <option value="YOUTHALIVE">YOUTHALIVE</option>
-                                <option value="TASO">TASO</option>
-                                <option value="RHSP">RHSP</option>
-                                <option value="MildMay">MildMay</option>
-                                <option value="Reach Out Mbuya">Reach Out Mbuya</option>
-                                <option value="Masaka Diocesan Medical Services">Masaka Diocesan Medical Services
-                                </option>
-                            </select>
+                                readOnly
+                            />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Group Type</label>
@@ -346,17 +408,16 @@ export function OrgUnitTable(props: Props) {
                                 <option value="">Select an option</option>
                                 <option value="1. VSLA Group">VSLA Group</option>
                                 <option value="2. Sinovuyo">Sinovuyo</option>
-                                <option value="3. Journeys Plus">Journeys Plus</option>
-                                <option value="4. NMN">NMN</option>
-                                <option value="7. Early Childhood Development(ECD)">Early Childhood Development(ECD)
-                                </option>
-                                <option value="5. Stepping Stones">Stepping Stones</option>
-                                <option value="6. Other(Specify)">Other(Specify)</option>
+                                <option value="3. ECD">ECD</option>
+                                <option value="4. AFLATEEN">AFLATEEN</option>
+                                <option value="5. NMN">NMN</option>
+                                <option value="6. Financial Literacy">Financial Literacy</option>
+                                <option value="7. SPM">SPM</option>
+                                <option value="8. Work Readiness">Work Readiness</option>
                             </select>
-
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Name / other</label>
+                            <label className="block text-sm font-medium text-gray-700">Group/Club/Name/Other</label>
                             <input
                                 type="text"
                                 name="other"
@@ -367,14 +428,20 @@ export function OrgUnitTable(props: Props) {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Sub Group</label>
-                            <input
-                                type="text"
+                            <select
                                 name="subGroup"
                                 value={formData.subGroup}
                                 onChange={handleInputChange}
                                 className="mt-1 block w-full border border-gray-300 rounded-md p-2"
                                 required
-                            />
+                            >
+                                <option value="">Select a sub group</option>
+                                {getSubGroupOptions().map((option) => (
+                                    <option key={option.value} value={option.value}>
+                                        {option.label}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Activity</label>
@@ -433,7 +500,7 @@ export function OrgUnitTable(props: Props) {
                         </div>
                         <div className="button-container">
                             <button type="submit" className="submit-button">
-                                Save
+                                Save & Continue
                             </button>
                             <button
                                 type="button"
@@ -452,7 +519,7 @@ export function OrgUnitTable(props: Props) {
                                 }}
                                 className="cancel-button"
                             >
-                                Cancel
+                                Close
                             </button>
                         </div>
                     </form>
