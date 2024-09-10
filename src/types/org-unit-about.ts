@@ -27,5 +27,6 @@ export interface Session {
   sessions: string[];
   age: string;
   sex: string;
+  name: string;
 
 }

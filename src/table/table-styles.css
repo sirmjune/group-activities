@@ -1,7 +1,7 @@
 .sticky-col-left {
     position: sticky;
     left: 0;
-    background-color: white; /* Avoid overlap issues */
+    background-color: red; /* Avoid overlap issues */
     z-index: 2; /* Ensure it is on top of scrollable columns */
     box-shadow: 1px 0 5px rgba(0, 0, 0, 0.1); /* Optional shadow for better visibility */
 }

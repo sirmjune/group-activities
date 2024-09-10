@@ -60,7 +60,10 @@ export function OrgUnitTable(props: Props) {
                     {value: 'Group VSLA methodology sessions ', label: 'Group VSLA methodology sessions'},
                     {value: 'VSLA monitoring & Support supervision ', label: 'VSLA monitoring & Support supervision'},
                     {value: 'VSLA saving and borrowing ', label: 'VSLA saving and borrowing'},
-                    {value: 'VSLA TOT/ Refresher', label: 'VSLA TOT/ Refresher'}
+                    {value: 'VSLA TOT/ Refresher', label: 'VSLA TOT/ Refresher'},
+                    {value: 'Financial Literacy', label: 'Financial Literacy'},
+                    {value: 'Bank Linkages', label: 'Bank Linkages'},
+                    {value: 'SPM Training Sessions', label: 'SPM Training Sessions'}
                 ];
             case '2. Sinovuyo':
                 return [
@@ -82,7 +85,7 @@ export function OrgUnitTable(props: Props) {
             case '6. Financial Literacy':
                 return [
                     {value: 'Financial Literacy', label: 'Financial Literacy'},
-                    {value: 'Bank Linkages', label: 'Bank Linkages'},
+
                 ];
             case '7. SPM':
                 return [
