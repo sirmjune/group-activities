@@ -70,8 +70,8 @@ export function SessionsTable(props: Props) {
     const fetchNewId = async () => {
         try {
             const response = await fetch(
-                // `${process.env.REACT_APP_BASE_URL}/ovc/api/system/id?`,
-                `/ovc/api/system/id?`, //with proxy
+                `${process.env.REACT_APP_BASE_URL}/ovc/api/system/id?`,
+                // `/ovc/api/system/id?`, //with proxy
                 {
                     method: 'GET',
                     headers: {
@@ -120,8 +120,8 @@ export function SessionsTable(props: Props) {
 
         try {
             const response = await fetch(
-                // `${process.env.REACT_APP_BASE_URL}/ovc/api/events?`,
-                `/ovc/api/events?`,
+                `${process.env.REACT_APP_BASE_URL}/ovc/api/events?`,
+                // `/ovc/api/events?`,
                 {
                     method: 'POST',
                     headers: {

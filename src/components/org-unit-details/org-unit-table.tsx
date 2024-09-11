@@ -366,7 +366,7 @@ export function OrgUnitTable(props: Props) {
             {formVisible && (
                 <div className="form-container">
                     <form onSubmit={handleFormSubmit} className="form">
-                       {/*loader for getting code*/}
+                        {/*loader for getting code*/}
                         {isLoading ? (
                             <div className="mt-4">
                                 <div className="loader-container">

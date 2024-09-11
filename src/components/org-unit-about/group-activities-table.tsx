@@ -9,6 +9,9 @@ import {useTable} from '../../hooks/use-table';
 import {GroupActivities} from '../../types/org-unit-about';
 import React from 'react';
 import './form-styles.css';
+import {useOrgUnitAbout} from "../../hooks/use-org-unit-about";
+import {deleteGroup} from "./deleteGroup";
+import '../common/table/Table.css';
 
 type Props = {
     data: GroupActivities[];
@@ -33,8 +36,14 @@ export function GroupActivitiesTable(props: Props) {
     const [isError, setIsError] = useState(false); // State to track if the message is an error
     const orgUnitId = props.orgUnitId;
     const [trigger, setTrigger] = useState(0);
-    const [isLoading, setIsLoading] = useState(false); //loader for code
-    const [loading, setLoading] = useState(false); //loader for saving entry
+    const [codeLoading, setCodeLoading] = useState(false); //loader for code
+    const [saving, setSaving] = useState(false); //loader for saving entry
+    // const [isTableLoading, setIsTableLoading] = useState(true); // Loading state for table data
+    const [loading, setLoading] = useState(true);
+
+
+    const { data, isLoading } = useOrgUnitAbout(props.detailsId);
+    // const  data = getOrgUnitAbout(orgUnitId)
 
     const table = useTable({
         data: props.data,
@@ -44,14 +53,22 @@ export function GroupActivitiesTable(props: Props) {
     });
 
     useEffect(() => {
+        // Set loading to false when data is available or an error occurs
+        if (!isLoading) {
+            setLoading(false);
+        }
+    }, [isLoading]);
+
+
+    useEffect(() => {
         const fetchData = async () => {
-            setIsLoading(true);
+            setCodeLoading(true);
 
             try {
                 // First request: Fetch the organization unit code
                 const orgUnitCodeResponse = await fetch(
-                    // `${process.env.REACT_APP_BASE_URL}/ovc/api/organisationUnits/${props.orgUnitId}`,
-                    `/ovc/api/organisationUnits/${props.orgUnitId}`,
+                    `${process.env.REACT_APP_BASE_URL}/ovc/api/organisationUnits/${props.orgUnitId}`,
+                    // `/ovc/api/organisationUnits/${props.orgUnitId}`,
                     {
                         method: 'GET',
                         headers: {
@@ -68,8 +85,8 @@ export function GroupActivitiesTable(props: Props) {
                 if (orgUnitCode) {
                     // Second request: Fetch the generated code using the organization unit code
                     const codeResponse = await fetch(
-                        // `${process.env.REACT_APP_BASE_URL}/ovc/api/trackedEntityAttributes/oqabsHE0ZUI/generate?ORG_UNIT_CODE=${orgUnitCode}`,
-                        `/ovc/api/trackedEntityAttributes/oqabsHE0ZUI/generate?ORG_UNIT_CODE=${orgUnitCode}`,
+                        `${process.env.REACT_APP_BASE_URL}/ovc/api/trackedEntityAttributes/oqabsHE0ZUI/generate?ORG_UNIT_CODE=${orgUnitCode}`,
+                        // `/ovc/api/trackedEntityAttributes/oqabsHE0ZUI/generate?ORG_UNIT_CODE=${orgUnitCode}`,
                         {
                             method: 'GET',
                             headers: {
@@ -84,15 +101,15 @@ export function GroupActivitiesTable(props: Props) {
                     if (codeData && codeData.value) {
                         setFormData((prevFormData) => ({
                             ...prevFormData,
-                            beneficiaryId: codeData.value,
-                            code: codeData.value,
+                            beneficiaryId: 'IND-' + codeData.value,
+                            code: 'IND-' +codeData.value,
                         }));
                     }
                 }
             } catch (error) {
                 console.error('Error fetching data:', error);
             } finally {
-                setIsLoading(false);
+                setCodeLoading(false);
             }
 
         };
@@ -113,8 +130,8 @@ export function GroupActivitiesTable(props: Props) {
     const fetchNewId = async () => {
         try {
             const response = await fetch(
-                // `${process.env.REACT_APP_BASE_URL}/ovc/api/system/id?`,
-                `/ovc/api/system/id?`, //with proxy
+                `${process.env.REACT_APP_BASE_URL}/ovc/api/system/id?`,
+                // `/ovc/api/system/id?`, //with proxy
                 {
                     method: 'GET',
                     headers: {
@@ -135,14 +152,14 @@ export function GroupActivitiesTable(props: Props) {
     async function handleFormSubmit(event: React.FormEvent) {
         event.preventDefault();
         // console.log("formData", formData)
-        setLoading(true);
+        setSaving(true);
 
 
         // Fetch new ID for the event
         const newId = await fetchNewId();
         if (!newId) {
             console.error('Failed to generate a new event ID!');
-            setLoading(false);
+            setSaving(false);
             setMessage('Failed to generate a new event ID!');
             return;
         }
@@ -168,8 +185,8 @@ export function GroupActivitiesTable(props: Props) {
 
         try {
             const response = await fetch(
-                // `${process.env.REACT_APP_BASE_URL}/ovc/api/events?`,
-                `/ovc/api/events?`, //wth proxy
+                `${process.env.REACT_APP_BASE_URL}/ovc/api/events?`,
+                // `/ovc/api/events?`, //wth proxy
                 {
                     method: 'POST',
                     headers: {
@@ -193,7 +210,7 @@ export function GroupActivitiesTable(props: Props) {
             setMessage('Error saving data. Please try again.');
             setIsError(true);
         }
-        setLoading(false);
+        setSaving(false);
     }
 
     // Function to handle form input changes
@@ -208,8 +225,8 @@ export function GroupActivitiesTable(props: Props) {
 
         try {
             const response = await fetch(
-                // `${process.env.REACT_APP_BASE_URL}/ovc/api/trackedEntityInstances/query.json?ouMode=ACCESSIBLE&program=RDEklSXCD4C&attribute=HLKc2AKR9jW:EQ:${enteredValue}&paging=false`,
-                `/ovc/api/trackedEntityInstances/query.json?ouMode=ACCESSIBLE&program=RDEklSXCD4C&attribute=HLKc2AKR9jW:EQ:${enteredValue}&paging=false`, //with proxy
+                `${process.env.REACT_APP_BASE_URL}/ovc/api/trackedEntityInstances/query.json?ouMode=ACCESSIBLE&program=RDEklSXCD4C&attribute=HLKc2AKR9jW:EQ:${enteredValue}&paging=false`,
+                // `/ovc/api/trackedEntityInstances/query.json?ouMode=ACCESSIBLE&program=RDEklSXCD4C&attribute=HLKc2AKR9jW:EQ:${enteredValue}&paging=false`, //with proxy
                 {
                     method: 'GET',
                     headers: {
@@ -219,7 +236,7 @@ export function GroupActivitiesTable(props: Props) {
                 });
             const data = await response.json();
 
-            console.log("response", data)
+            // console.log("response", data)
 
             if (data.rows && data.rows.length > 0) {
                 const row = data.rows[0]; // Get the first row
@@ -244,6 +261,47 @@ export function GroupActivitiesTable(props: Props) {
     };
 
 
+    const renderTableRows = () => {
+
+        const groupData = data?.groupActivities;
+        // console.log("data", groupData);
+
+        if (!groupData || groupData.length === 0) {
+            return (
+                <tr>
+                    <td colSpan={6}>No data available for the selected Entry, Please add new Beneficially</td>
+                </tr>
+            );
+        }
+
+        return groupData.map((activity, index) => {
+
+            return (
+                <tr key={activity.id || index}>
+                    <td>{activity.directIndirect}</td>
+                    <td>{activity.code}</td>
+                    <td>{activity.name}</td>
+                    <td>{activity.sex}</td>
+                    <td>{activity.age}</td>
+
+                    <td>
+                        <button
+                            onClick={(event) => {
+                                event.stopPropagation();  // Prevent row click event
+                                // const rowId = info.row.original.id;
+                                deleteGroup(activity.id, credentials, setMessage, setIsError)
+                            }}
+                            className="delete-button"
+                        >
+                            x
+                        </button>
+                    </td>
+                </tr>
+            );
+        });
+    };
+
+
     return (
         <main className="space-y-4">
             <Header
@@ -252,7 +310,7 @@ export function GroupActivitiesTable(props: Props) {
                 search={search}
                 back={
                     <Link to={`/${props.orgUnitId}`}>
-                        <button className="py-1 px-4 bg-black text-white rounded-md text-sm">
+                    <button className="py-1 px-4 bg-black text-white rounded-md text-sm">
                             Back
                         </button>
                     </Link>
@@ -267,7 +325,7 @@ export function GroupActivitiesTable(props: Props) {
             />
 
             {/*looader for saving entry*/}
-            {loading && <div className="mt-4">
+            {saving && <div className="mt-4">
                 <div className="loader-container">
                     <div className="spinner"></div>
                     <p>Saving Entry...</p>
@@ -297,7 +355,7 @@ export function GroupActivitiesTable(props: Props) {
                                 <option value="Indirect">Indirect</option>
                             </select>
                         </div>
-                        {isLoading ? (
+                        {codeLoading ? (
                             <div className="mt-4">
                                 <div className="loader-container">
                                     <div className="spinner"></div>
@@ -392,10 +450,42 @@ export function GroupActivitiesTable(props: Props) {
             )}
 
             {/* Display the table only if the form is not visible */}
-            {!formVisible && <Table table={table}/>}
-            {!formVisible && <TablePagination table={table}/>}
+            {/*{!formVisible && <Table table={table}/>}*/}
+            {/*{!formVisible && <TablePagination table={table}/>}*/}
             {/*<Table table={table} />*/}
             {/*<TablePagination table={table} />*/}
+
+
+            {loading ? (
+                <div className="mt-4">
+                    <div className="loader-container">
+                        <div className="spinner"></div>
+                        <p>Loading data, please wait...</p>
+                    </div>
+                </div>
+            ) : (
+                <>
+                    {!formVisible && <div className="table-responsive">
+                        <table className="table table-striped table-bordered table-hover table-dark-header">
+                            <thead className="text-nowrap">
+                            <tr>
+                                <th>Beneficiary type</th>
+                                <th>GAT. Individual Code </th>
+                                <th>Name</th>
+                                <th>Sex </th>
+                                <th>Age </th>
+                                <th>Delete</th>
+                            </tr>
+                            </thead>
+                            <tbody>{renderTableRows()}</tbody>
+                        </table>
+                    </div>}
+                    {/*/!* Show table only if form is not visible *!/*/}
+                    {/*{!formVisible && <Table table={table} />}*/}
+                    {/*{!formVisible && <TablePagination table={table} />}*/}
+                </>
+            )}
+
         </main>
     );
 }
