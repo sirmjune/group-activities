@@ -28,7 +28,7 @@ export function OrgUnitTable(props: Props) {
         id: ''
     });
     const [formData, setFormData] = useState({
-        name: '',
+        name: 'ROM',
         code: '',
         groupType: '',
         other: '',
@@ -393,7 +393,7 @@ export function OrgUnitTable(props: Props) {
                             <input
                                 type="text"
                                 name="name"
-                                value="ROM"
+                                value={formData.name}
                                 className="mt-1 block w-full border border-gray-300 rounded-md p-2"
                                 required
                                 readOnly
