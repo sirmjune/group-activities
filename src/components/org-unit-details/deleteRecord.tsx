@@ -6,6 +6,7 @@ export const handleDelete = async (id: string, credentials: string, setMessage: 
     try {
         const response = await fetch(
             `${process.env.REACT_APP_BASE_URL}/ovc/api/trackedEntityInstances/${id}`,
+            // `/ovc/api/trackedEntityInstances/${id}`,
             {
                 method: 'DELETE',
                 headers: {

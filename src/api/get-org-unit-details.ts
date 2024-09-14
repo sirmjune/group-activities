@@ -10,7 +10,8 @@ export async function getOrgUnitDetails(id: string): Promise<OrgUnitDetails[]> {
     // `/ovc/api/trackedEntityInstances/query.json?ou=${id}&ouMode=SELECTED&&order=created:desc&program=IXxHJADVCkb&pageSize=50&page=1&totalPages=false`  //wth proxy
   );
   const rows = response.data.rows;
-
+  // console.log("orgunit res", response);
+  // console.log("id res", id);
   return rows.map((row) => ({
     id: row[0],
     code: row[8],

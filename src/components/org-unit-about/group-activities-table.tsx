@@ -42,7 +42,7 @@ export function GroupActivitiesTable(props: Props) {
     const [loading, setLoading] = useState(true);
 
 
-    const { data, isLoading } = useOrgUnitAbout(props.detailsId);
+    const {data, isLoading} = useOrgUnitAbout(props.detailsId);
     // const  data = getOrgUnitAbout(orgUnitId)
 
     const table = useTable({
@@ -102,7 +102,7 @@ export function GroupActivitiesTable(props: Props) {
                         setFormData((prevFormData) => ({
                             ...prevFormData,
                             beneficiaryId: 'IND-' + codeData.value,
-                            code: 'IND-' +codeData.value,
+                            code: 'IND-' + codeData.value,
                         }));
                     }
                 }
@@ -261,6 +261,17 @@ export function GroupActivitiesTable(props: Props) {
     };
 
 
+
+    //pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const rowsPerPage = 10; // You can make this dynamic if needed
+    const groupDataPages = data?.groupActivities || [];
+
+    // Calculate the total number of pages
+    const totalPages = Math.ceil(groupDataPages.length / rowsPerPage);
+
+    // Get the data to display on the current page
+    const paginatedData = groupDataPages.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
     const renderTableRows = () => {
 
         const groupData = data?.groupActivities;
@@ -274,7 +285,7 @@ export function GroupActivitiesTable(props: Props) {
             );
         }
 
-        return groupData.map((activity, index) => {
+        return paginatedData.map((activity, index) => {
 
             return (
                 <tr key={activity.id || index}>
@@ -301,6 +312,18 @@ export function GroupActivitiesTable(props: Props) {
         });
     };
 
+    const handlePreviousPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
 
     return (
         <main className="space-y-4">
@@ -310,7 +333,7 @@ export function GroupActivitiesTable(props: Props) {
                 search={search}
                 back={
                     <Link to={`/${props.orgUnitId}`}>
-                    <button className="py-1 px-4 bg-black text-white rounded-md text-sm">
+                        <button className="py-1 px-4 bg-black text-white rounded-md text-sm">
                             Back
                         </button>
                     </Link>
@@ -403,14 +426,18 @@ export function GroupActivitiesTable(props: Props) {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Sex</label>
-                            <input
-                                type="text"
+                            <select
                                 name="sex"
                                 value={formData.sex}
                                 onChange={handleInputChange}
                                 className="mt-1 block w-full border border-gray-300 rounded-md p-2"
                                 required
-                            />
+                            >
+                                <option value="">Select an option</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female
+                                </option>
+                            </select>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Age</label>
@@ -470,16 +497,35 @@ export function GroupActivitiesTable(props: Props) {
                             <thead className="text-nowrap">
                             <tr>
                                 <th>Beneficiary type</th>
-                                <th>GAT. Individual Code </th>
+                                <th>GAT. Individual Code</th>
                                 <th>Name</th>
-                                <th>Sex </th>
-                                <th>Age </th>
+                                <th>Sex</th>
+                                <th>Age</th>
                                 <th>Delete</th>
                             </tr>
                             </thead>
                             <tbody>{renderTableRows()}</tbody>
                         </table>
                     </div>}
+
+                    {/* Pagination Controls */}
+                    <div className="pagination-controls mt-3">
+                        <button
+                            className="btn btn-primary me-2"
+                            onClick={handlePreviousPage}
+                            disabled={currentPage === 1}
+                        >
+                            Previous
+                        </button>
+                        <span>Page {currentPage} of {totalPages}</span>
+                        <button
+                            className="btn btn-primary ms-2"
+                            onClick={handleNextPage}
+                            disabled={currentPage === totalPages}
+                        >
+                            Next
+                        </button>
+                    </div>
                     {/*/!* Show table only if form is not visible *!/*/}
                     {/*{!formVisible && <Table table={table} />}*/}
                     {/*{!formVisible && <TablePagination table={table} />}*/}

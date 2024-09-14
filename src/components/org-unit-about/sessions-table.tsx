@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {useState} from 'react';
 import {Link} from 'react-router-dom';
 import {Table, TablePagination} from '../common/table';
@@ -6,6 +6,7 @@ import {Header} from '../header';
 import {useTable} from '../../hooks/use-table';
 import {Session} from '../../types/org-unit-about';
 import {sessionsColumns} from '../../table/sessions';
+import {useOrgUnitDetails} from "../../hooks/use-org-unit-details";
 
 
 type Props = {
@@ -18,6 +19,12 @@ export function SessionsTable(props: Props) {
     const credentials = btoa(`Skununka:Nomisr123$$$$}`);
     const [search, setSearch] = useState('');
     console.log("sessionsTable", props.data);
+
+    // for setting sessions dropdown
+    const {data} = useOrgUnitDetails(props.orgUnitId);
+    const [session, setSession] = useState('');
+
+    console.log("data", data);
 
 
     const [searchCode, setSearchCode] = useState('');
@@ -44,10 +51,224 @@ export function SessionsTable(props: Props) {
         item.code.toLowerCase().includes(searchCode.toLowerCase())
     );
 
-    // Filtered codes based on search input
-    const filteredCodes = codes.filter(code =>
-        code.toLowerCase().includes(searchCode.toLowerCase())
-    );
+
+    useEffect(() => {
+        const matchedElement = data.find(item => item.id === props.detailsId);
+        if (matchedElement && matchedElement.subGroup) {
+            setSession(matchedElement.subGroup);
+        }
+    }, [data, props.detailsId]);
+
+    useEffect(() => {
+        if (session) {
+            // setDropdownOptions(getSessionOptions());
+            setFormData((prevData) => ({...prevData, session}));
+        }
+    }, [session]);
+
+
+    // Options for the "Sub Group" dropdown based on the "Group Type"
+    const getSessionOptions = () => {
+        switch (formData.session) {
+            case 'Group VSLA methodology sessions':
+                return [
+                    {value: '1.Group formation and General Assembly', label: '1.Group formation and General Assembly'},
+                    {value: ' 2.VSLA concepts. ', label: ' 2.VSLA concepts.'},
+                    {
+                        value: '3.Leadership and Elections of the Management committee ',
+                        label: '3.Leadership and Elections of the Management committee'
+                    },
+                    {
+                        value: ' 4.Development of Internal rules and regulations.',
+                        label: ' 4.Development of Internal rules and regulations.'
+                    },
+                    {
+                        value: '5.Introduction to written record keeping.',
+                        label: '5.Introduction to written record keeping.'
+                    },
+                    {value: '6.Meeting procedures/ meeting steps.', label: '6.Meeting procedures/ meeting steps.'},
+                    {value: '7.Conflict resolution', label: '7.Conflict resolution'},
+                    {value: '8.Share-out & Action audit', label: '8.Share-out & Action audit'}
+                ];
+            case 'VSLA monitoring & Support supervision':
+                return [
+                    {value: '1.Intensive phase', label: '1.Intensive phase'},
+                    {value: '2.Development Phase', label: '2.Development Phase'},
+                    {value: '3.Maturity Phase ', label: '3.Maturity Phase '}
+                ];
+            case 'VSLA saving and borrowing':
+                return [
+                    {value: '1.Saving', label: '1.Saving'},
+                    {value: '2.Borrowing', label: '2.Borrowing'},
+                    {value: '3.VSLA fund', label: '3.VSLA fund'}
+                ];
+            case 'VSLA TOT/ Refresher':
+                return [
+                    {value: '1.TOT on VSLA methodology ', label: '1.TOT on VSLA methodology '},
+                    {value: '2.Financial Literacy and Bank Linkage ', label: '2.Financial Literacy and Bank Linkage '},
+                    {
+                        value: '3.Selection Planning and Management of IGAs ',
+                        label: '3.Selection Planning and Management of IGAs '
+                    },
+                ];
+            case 'Financial Literacy':
+                return [
+                    {
+                        value: '1.Module1: Personal Financial Management',
+                        label: '1. Module1: Personal Financial Management'
+                    },
+                    {value: '2.Module2: Saving', label: '2.Module2: Saving'},
+                    {value: '3.Module3: Loan Management', label: '3.Module3: Loan Management'},
+                    {value: '4.Module4: Investment', label: '4.Module4: Investment'},
+                    {value: '5.Module 5: Planning for Old age', label: '5.Module 5: Planning for Old age'},
+                    {value: '6.Module 6: Financial Service providers', label: '6.Module 6: Financial Service providers'}
+                ];
+            case 'Bank Linkages':
+                return [
+                    {
+                        value: '1.Rating of Mature groups for Bank linkage',
+                        label: '1.Rating of Mature groups for Bank linkage'
+                    },
+                    {value: '2.Sensitization on linkage banking', label: '2.Sensitization on linkage banking'},
+                    {value: '3.Account opening process ', label: '3.Account opening process'},
+                    {
+                        value: '4.Monitoring the performance of Linked groups ',
+                        label: '4.Monitoring the performance of Linked groups'
+                    },
+
+                ];
+            case 'SPM Training':
+                return [
+                    {value: '1.IGA selection process', label: '1.IGA selection process'},
+                    {value: '2.Market assessment', label: '2.Market assessment'},
+                    {value: '3.Knowledge and skills', label: '3.Knowledge and skills'},
+                    {
+                        value: '4.Estimation of start-up and working costs',
+                        label: '4.Estimation of start-up and working costs'
+                    },
+                    {value: '5.Estimating sales and Income', label: '5.Estimating sales and Income'},
+                    {value: '6.Weekly expenses and Weekly income', label: '6.Weekly expenses and Weekly income'},
+                    {value: '7.Actual IGA Selection', label: '7.Actual IGA Selection'},
+                    {value: '8.IGA planning', label: '8.IGA planning'},
+                    {value: '9.IGA management', label: '9.IGA management'}
+                ];
+            case 'SINOVUYO':
+                return [
+                    {
+                        value: '1.Introducing the program and defining goals.',
+                        label: '1.Introducing the program and defining goals.'
+                    },
+                    {
+                        value: '2.Building a positive relationship thru',
+                        label: '2.Building a positive relationship thru'
+                    },
+                    {value: '3.Praising each other.', label: '3.Praising each other.'},
+                    {value: '4.Talking about emotions', label: '4.Talking about emotions'},
+                    {value: '5.Managing anger & solving problems:', label: '5.Managing anger & solving problems:'},
+                    {
+                        value: '6.Problem solving-putting out the fire spending time together',
+                        label: '6.Problem solving-putting out the fire spending time together'
+                    },
+                    {
+                        value: '7.Motivation to save and making a budget',
+                        label: '7.Motivation to save and making a budget'
+                    },
+                    {
+                        value: '8.Dealing with problems without Conflict-I',
+                        label: '8.Dealing with problems without Conflict-I'
+                    },
+                    {
+                        value: '9.Dealing with problems without conflict-II',
+                        label: ' 9.Dealing with problems without conflict-II'
+                    },
+                    {
+                        value: '10.Establishing family rules and routines',
+                        label: '10.Establishing family rules and routines'
+                    },
+                    {
+                        value: '11.Understanding the ways to save and the risk to borrow ',
+                        label: '11.Understanding the ways to save and the risk to borrow '
+                    },
+                    {value: '12.Keeping safe in the community', label: '12.Keeping safe in the community'},
+                    {value: '13.tResponding to crisis', label: '13.Responding to crisis'},
+                    {value: '14.Widening the circle of support', label: '14.tWidening the circle of support'}
+                ];
+            case 'Early Childhood Development Sessions ':
+                return [
+                    {
+                        value: '1.introduction to Early childhood development',
+                        label: '1.introduction to Early childhood development'
+                    },
+                    {value: '2.Physical development', label: '2.Physical development'},
+                    {value: '3.cognitive development', label: '3.cognitive development'},
+                    {value: '4.Language development', label: '4.Language development'},
+                    {value: '5.social and Emotional Development', label: '5.social and Emotional Development'},
+                    {value: '6.Baby cues', label: '6.Baby cues'},
+                    {value: '7.Baby Massage', label: '7.Baby Massage'},
+                    {
+                        value: '8.Basic health, Hygiene, Safety and Nutrition',
+                        label: '8.Basic health, Hygiene, Safety and Nutrition'
+                    },
+                    {value: '9.HIV Basic and HIV in children', label: '9.HIV Basic and HIV in children'},
+                    {
+                        value: '10.Disclosure, Adherence and HIV risks in children.',
+                        label: '10.Disclosure, Adherence and HIV risks in children.'
+                    },
+                    {value: '11.Loss, Grief and Bereavement', label: '11.Loss, Grief and Bereavement'},
+                    {
+                        value: '12.Care planning, Referrals and Linkages to care.',
+                        label: '12.Care planning, Referrals and Linkages to care.'
+                    }
+                ];
+            case 'AFLATEEN':
+                return [
+                    {value: '1.Personal Understanding & Exploration', label: '1.Personal Understanding & Exploration'},
+                    {value: '2.Rights & Responsibilities', label: '2.Rights & Responsibilities'},
+                    {value: '3.Saving & Spending', label: '3.Saving & Spending'},
+                    {value: '4.Planning & Budgeting', label: '4.Planning & Budgeting'},
+                    {value: '5.Social & Financial Enterprise', label: '5.Social & Financial Enterprise'}
+                ];
+            case 'No means No sessions (Boys)': //full  name?
+                return [
+                    {value: '1.Welcome to the NMN Program', label: '1.Welcome to the NMN Program'},
+                    {value: '2.The steps on your journey', label: '2.The steps on your journey'},
+                    {value: '3.Step outside the box', label: '3.Step outside the box'},
+                    {value: '4.Your sources of strength', label: '4.Your sources of strength'},
+                    {value: '5.Scenes of strength', label: '5.Scenes of strength'},
+                    {value: '6.Empowered survivors’ perspective', label: '6.Empowered survivors’ perspective'},
+                    {value: '7.Your moment of truth', label: '7.Your moment of truth'},
+                    {value: '8.It takes courage Intervention', label: '8.It takes courage Intervention'},
+                    {value: '9.Bystander intervention', label: '9.Bystander intervention'},
+                    {value: '10.Graduation.', label: '10.Graduation.'}
+                ];
+            case 'No means No sessions (Girls)':
+                return [
+                    {
+                        value: '1.Empowerment Self-defence Basics & Assault Continuum.',
+                        label: '1.Empowerment Self-defence Basics & Assault Continuum.'
+                    },
+                    {
+                        value: '2.Awareness, Target, test & Attack, weapons and Close targets',
+                        label: '2.Awareness, Target, test & Attack, weapons and Close targets'
+                    },
+                    {
+                        value: '3.Boundaries, Assertiveness, Name the behaviour, Make a scene, Mawori Warrior, Close target, What\'s free what\'s open',
+                        label: '3.Boundaries, Assertiveness, Name the behaviour, Make a scene, Mawori Warrior, Close target, What\'s free what\'s open'
+                    },
+                    {value: '4.Negotiations, Descalation and Strike', label: '4.Negotiations, Descalation and Strike'}
+                ];
+            case 'Work Readiness Assessment':
+                return [
+                    {value: 'Work Readiness Assessment', label: 'Work Readiness Assessment'}
+                ];
+            default:
+                return [
+                    {value: '', label: 'No match for Subgroup'}
+                ];
+        }
+    };
+
+    // console.log("sss", getSessionOptions());
 
     function onAdd() {
         setFormVisible(true);
@@ -251,108 +472,13 @@ export function SessionsTable(props: Props) {
                                 className="mt-1 block w-full border border-gray-300 rounded-md p-2"
                                 required
                             >
-                                <option value="">Select an option</option>
-                                <option value="Introducing the program and defining goals">Introducing the program and
-                                    defining goals
-                                </option>
-                                <option value="Building a positive relationship thru">Building a positive relationship
-                                    thru
-                                </option>
-                                <option value="Talking about emotions">Talking about emotions</option>
-                                <option value="Managing anger & solving problems">Managing anger & solving problems
-                                </option>
-                                <option value="Problem solving-putting out the fire spending time together">Problem
-                                    solving-putting out the fire spending time together
-                                </option>
-                                <option value="Problem solving-putting out the fire spending time">Problem
-                                    solving-putting out the fire spending time
-                                </option>
-                                <option value="Motivation to save and making a budget">Motivation to save and making a
-                                    budget
-                                </option>
-                                <option value="Dealing with problems without Conflict-I">Dealing with problems without
-                                    Conflict-I
-                                </option>
-                                <option value="Dealing with problems without conflict-II">Dealing with problems without
-                                    conflict-II
-                                </option>
-                                <option value=" Establishing family rules and routines"> Establishing family rules and
-                                    routines
-                                </option>
-                                <option value="Understanding the ways to save and the risk to borrow">Understanding the
-                                    ways to save and the risk to borrow
-                                </option>
-                                <option value="Keeping safe in the community">Keeping safe in the community</option>
-                                <option value="Responding to crisis">Responding to crisis</option>
-                                <option value="Widening the circle of support">Widening the circle of support</option>
-                                <option value="VSLA concepts">VSLA concepts</option>
-                                <option value="Leadership and Elections of the Management committee">Leadership and
-                                    Elections of the Management committee
-                                </option>
-                                <option value="Leadership and Elections of the Management committee">Leadership and
-                                    Elections of the Management committee
-                                </option>
-                                <option value="Introduction to written record keeping">Introduction to written record
-                                    keeping
-                                </option>
-                                <option value="Meeting procedures/ meeting steps">Meeting procedures/ meeting steps
-                                </option>
-                                <option value="Conflict resolution">Conflict resolution</option>
-                                <option value="Share-out & Action audit">Share-out & Action audit</option>
-                                <option value="TOT on VSLA methodology">TOT on VSLA methodology</option>
-                                <option value="Financial Literacy and Bank Linkage">Financial Literacy and Bank
-                                    Linkage
-                                </option>
-                                <option value="Selection Planning and Management of IGAs">Selection Planning and
-                                    Management of IGAs
-                                </option>
-                                <option value="Module1: Saving">Module1: Saving</option>
-                                <option value="Module2: Debt">Module2: Debt</option>
-                                <option value="Module3: Budgeting">Module3: Budgeting</option>
-                                <option value="Rating of Mature groups for Bank linkage">Rating of Mature groups for
-                                    Bank linkage
-                                </option>
-                                <option value="Sensitization on linkage banking">Sensitization on linkage banking
-                                </option>
-                                <option value="Account opening process">Account opening process</option>
-                                <option value="Monitoring the performance of Linked groups">Monitoring the performance
-                                    of Linked groups
-                                </option>
-                                <option value="IGA selection process">IGA selection process</option>
-                                <option value="Market assessment">Market assessment</option>
-                                <option value="Knowledge and skills">Knowledge and skills</option>
-                                <option value="Estimation of start-up and working costs"> Estimation of start-up and
-                                    working costs
-                                </option>
-                                <option value="Estimating sales and Income">Estimating sales and Income</option>
-                                <option value="Weekly expenses and Weekly income">Weekly expenses and Weekly income
-                                </option>
-                                <option value="Actual IGA Selection">Actual IGA Selection</option>
-                                <option value="IGA planning">IGA planning</option>
-                                <option value="IGA management">IGA management</option>
-                                <option value="Pupil to pupil Relationships">Pupil to pupil Relationships</option>
-                                <option value="Teacher to pupil Relationships">Teacher to pupil Relationships</option>
-                                <option value="Resisting negative peer pressure">Resisting negative peer pressure
-                                </option>
-                                <option value="HIV/AIDS, STI, Truth and Myths">HIV/AIDS, STI, Truth and Myths</option>
-                                <option value="HIV Transmission">HIV Transmission</option>
-                                <option value="Stigma and Discrimination">Stigma and Discrimination</option>
-                                <option value="Gender and HIV">Gender and HIV</option>
-                                <option value="Teenage Pregnancy">Teenage Pregnancy</option>
-                                <option value="The 4Cs and meaning of consents">The 4Cs and meaning of consents</option>
-                                <option value="Power and Consent">Power and Consent</option>
-                                <option
-                                    value="HIV & School Related Gender Based Violence (SRGBV) risk and protection">HIV &
-                                    School Related Gender Based Violence (SRGBV) risk and protection
-                                </option>
-                                <option value="HIV & School Related GBV risk and protection">HIV & School Related GBV
-                                    risk and protection
-                                </option>
-                                <option value="Positive bystander response to violence"> Positive bystander response to
-                                    violence
-                                </option>
+                                <option value="">Select a session</option>
+                                {getSessionOptions().map((option) => (
+                                    <option key={option.value} value={option.value}>
+                                        {option.label}
+                                    </option>
+                                ))}
                             </select>
-
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Session Date</label>

@@ -8,6 +8,9 @@ import {useTable} from '../../hooks/use-table';
 import {useHistory} from 'react-router-dom';
 import React from 'react';
 import '../org-unit-about/form-styles.css';
+import {useOrgUnitDetails} from "../../hooks/use-org-unit-details";
+import {deleteGroup} from "../org-unit-about/deleteGroup";
+import {handleDelete} from "./deleteRecord";
 
 type Props = {
     orgUnitDetails: OrgUnitDetails[];
@@ -15,12 +18,14 @@ type Props = {
 };
 
 export function OrgUnitTable(props: Props) {
+    const {data, isLoading} = useOrgUnitDetails(props.orgUnitId); //fetch data
+    const [loading, setLoading] = useState(true); //fetching data
     const credentials = btoa(`Skununka:Nomisr123$$$$}`);
     const [search, setSearch] = useState('');
     const history = useHistory();
     const [formVisible, setFormVisible] = useState(false);
     const [trigger, setTrigger] = useState(0); // State to trigger useEffect
-    const [isLoading, setIsLoading] = useState(false); // loader for getting code
+    const [getCode, setGetCode] = useState(false); // loader for getting code
     const [userData, setUserData] = useState({
         username: '',
         surname: '',
@@ -42,7 +47,7 @@ export function OrgUnitTable(props: Props) {
     // console.log("orgUnitDetails", props.orgUnitDetails);
     const [message, setMessage] = useState(null); // State for success or error message
     const [isError, setIsError] = useState(false); // State to track if the message is an error
-    const [loading, setLoading] = useState(false); //loader for saving entry
+    const [saving, setSaving] = useState(false); //loader for saving entry
     const [orgUnitCode, setOrgUnitcode] = useState('');
     const table = useTable({
         data: props.orgUnitDetails,
@@ -51,6 +56,12 @@ export function OrgUnitTable(props: Props) {
         setGlobalFilter: setSearch,
     });
 
+    useEffect(() => {
+        // Set loading to false when data is available or an error occurs
+        if (!isLoading) {
+            setLoading(false);
+        }
+    }, [isLoading]);
 
     // Options for the "Sub Group" dropdown based on the "Group Type"
     const getSubGroupOptions = () => {
@@ -67,7 +78,7 @@ export function OrgUnitTable(props: Props) {
                 ];
             case '2. Sinovuyo':
                 return [
-                    {value: 'SINOVUYO SESSIONS ', label: 'SINOVUYO SESSIONS '},
+                    {value: 'SINOVUYO SESSIONS', label: 'SINOVUYO SESSIONS'},
                 ];
             case '3. ECD':
                 return [
@@ -103,7 +114,7 @@ export function OrgUnitTable(props: Props) {
 
     useEffect(() => {
         const fetchData = async () => {
-            setIsLoading(true);
+            setGetCode(true);
 
             try {
                 // First request: Fetch the organization unit code
@@ -149,7 +160,7 @@ export function OrgUnitTable(props: Props) {
             } catch (error) {
                 console.error('Error fetching data:', error);
             } finally {
-                setIsLoading(false);
+                setGetCode(false);
             }
         };
 
@@ -223,13 +234,13 @@ export function OrgUnitTable(props: Props) {
     async function handleFormSubmit(event: React.FormEvent) {
         event.preventDefault();
         // console.log("formData", formData)
-        setLoading(true);
+        setSaving(true);
 
         // Fetch new ID for the event
         const newId = await fetchNewId();
         if (!newId) {
             console.error('Failed to generate a new trackedEntityInstance ID.');
-            setLoading(false);
+            setSaving(false);
             setMessage('Failed to generate a new trackedEntityInstance ID.');
             return;
         }
@@ -239,7 +250,7 @@ export function OrgUnitTable(props: Props) {
         const userData = await fetchUser();
         if (!userData) {
             console.error('Failed to get username.');
-            setLoading(false);
+            setSaving(false);
             setMessage('Failed to get username.');
             return;
         }
@@ -288,6 +299,8 @@ export function OrgUnitTable(props: Props) {
             ],
             enrollments: [
                 {
+                    status: "ACTIVE",
+                    trackedEntityInstance: newId,
                     program: 'IXxHJADVCkb',
                     orgUnit: props.orgUnitId,
                     enrollmentDate: new Date().toISOString(),
@@ -331,12 +344,13 @@ export function OrgUnitTable(props: Props) {
             setSelectedDate('');
             setMessage('Data successfully saved!');
             setIsError(false);
+            setTrigger(prevTrigger => prevTrigger + 1);
         } catch (error) {
             console.error('Error posting data:', error);
             setMessage('Error saving data. Please try again.');
             setIsError(true);
         }
-        setLoading(false);
+        setSaving(false);
     }
 
     function handleInputChange(event) {
@@ -345,12 +359,83 @@ export function OrgUnitTable(props: Props) {
     }
 
 
+    //pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const rowsPerPage = 10; // You can make this dynamic if needed
+
+    // Calculate the total number of pages
+    const totalPages = Math.ceil(data.length / rowsPerPage);
+
+    // Get the data to display on the current page
+    const paginatedData = data.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
+
+    const renderTableRows = () => {
+
+        const orgData = data;
+        // console.log("org", orgData);
+
+        if (!orgData || orgData.length === 0) {
+            return (
+                <tr>
+                    <td colSpan={8}>No data available for the selected Entry, Please add new Beneficially</td>
+                </tr>
+            );
+        }
+
+        return paginatedData.map((row, index) => {
+
+            return (
+                <tr key={row.id || index}
+                    onClick={() => {
+                        const id = row.id;  // Assuming 'id' is the correct field from your row data
+                        history.push(`/${props.orgUnitId}/${id}/about`);
+                    }}>
+                    <td>{row.id}</td>
+                    <td>{row.code}</td>
+                    <td>{row.name}</td>
+                    <td>{row.groupType}</td>
+                    <td>{row.subGroup}</td>
+                    <td>{row.activity}</td>
+                    <td>{row.description}</td>
+                    <td>{row.dateOfActivity}</td>
+                    <td>{row.venue}</td>
+
+                    <td>
+                        <button
+                            onClick={(event) => {
+                                event.stopPropagation();  // Prevent row click event
+                                // const rowId = info.row.original.id;
+                                handleDelete(row.id, credentials, setMessage, setIsError)
+                            }}
+                            className="delete-button"
+                        >
+                            x
+                        </button>
+                    </td>
+                </tr>
+            );
+        });
+    };
+
+    const handlePreviousPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
     return (
         <main className="space-y-4">
             <Header onAdd={onAdd} search={search} onSearch={setSearch}/>
 
             {/*looader for saving entry*/}
-            {loading && <div className="mt-4">
+            {saving && <div className="mt-4">
                 <div className="loader-container">
                     <div className="spinner"></div>
                     <p>Saving Entry...</p>
@@ -367,7 +452,7 @@ export function OrgUnitTable(props: Props) {
                 <div className="form-container">
                     <form onSubmit={handleFormSubmit} className="form">
                         {/*loader for getting code*/}
-                        {isLoading ? (
+                        {getCode ? (
                             <div className="mt-4">
                                 <div className="loader-container">
                                     <div className="spinner"></div>
@@ -530,14 +615,65 @@ export function OrgUnitTable(props: Props) {
             )}
 
 
-            {!formVisible && <Table
-                table={table}
-                onRowClick={(row) => {
-                    const id = row.getValue('id');
-                    history.push(`/${props.orgUnitId}/${id}/about`);
-                }}
-            />}
-            {!formVisible && <TablePagination table={table}/>}
+            {loading ? (
+                <div className="mt-4">
+                    <div className="loader-container">
+                        <div className="spinner"></div>
+                        <p>Loading data, please wait...</p>
+                    </div>
+                </div>
+            ) : (
+                <>
+                    {!formVisible && <div className="table-responsive">
+                        <table className="table table-striped table-bordered table-hover table-dark-header">
+                            <thead className="text-nowrap">
+                            <tr>
+                                <th>ID</th>
+                                <th>Code</th>
+                                <th>Name of CSO/Partner</th>
+                                <th>Group Type</th>
+                                <th>Sub Group</th>
+                                <th>Activity</th>
+                                <th>Description</th>
+                                <th>Date of Activity</th>
+                                <th>Venue</th>
+                                <th>Delete</th>
+                            </tr>
+                            </thead>
+                            <tbody>{renderTableRows()}</tbody>
+                        </table>
+                    </div>}
+
+                    {/* Pagination Controls */}
+                    <div className="pagination-controls mt-3">
+                        <button
+                            className="btn btn-primary me-2"
+                            onClick={handlePreviousPage}
+                            disabled={currentPage === 1}
+                        >
+                            Previous
+                        </button>
+                        <span>Page {currentPage} of {totalPages}</span>
+                        <button
+                            className="btn btn-primary ms-2"
+                            onClick={handleNextPage}
+                            disabled={currentPage === totalPages}
+                        >
+                            Next
+                        </button>
+                    </div>
+                </>
+            )}
+
+
+            {/*{!formVisible && <Table*/}
+            {/*    table={table}*/}
+            {/*    onRowClick={(row) => {*/}
+            {/*        const id = row.getValue('id');*/}
+            {/*        history.push(`/${props.orgUnitId}/${id}/about`);*/}
+            {/*    }}*/}
+            {/*/>}*/}
+            {/*{!formVisible && <TablePagination table={table}/>}*/}
         </main>
     );
 }

@@ -11,7 +11,7 @@ export async function getOrgUnitAbout(id: string) {
     // `/ovc/api/trackedEntityInstances/${id}.json?program=IXxHJADVCkb&fields=enrollments[events[event,dataValues[dataElement,value]]` //wth proxy
   );
 
-  // console.log("response", response);
+  // console.log(" session response", response);
   const sessions: Session[] = [];
   const groupActivities: GroupActivities[] = [];
 
