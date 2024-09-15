@@ -20,7 +20,7 @@ export const deleteGroup = async (id: string, credentials: string, setMessage: a
             // setOrgUnitDetails((prevDetails) => prevDetails.filter((item) => item.id !== id));
             console.log("deleted",response, id);
             setMessage('Record successfully deleted!');
-            window.alert("Record has been deleted!");
+            // window.alert("Record has been deleted!");
             setIsError(false);
         } else {
             console.error('Failed to delete entity.');

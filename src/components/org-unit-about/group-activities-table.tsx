@@ -42,7 +42,7 @@ export function GroupActivitiesTable(props: Props) {
     const [loading, setLoading] = useState(true);
 
 
-    const {data, isLoading} = useOrgUnitAbout(props.detailsId);
+    const {data, isLoading, refetch} = useOrgUnitAbout(props.detailsId);
     // const  data = getOrgUnitAbout(orgUnitId)
 
     const table = useTable({
@@ -55,6 +55,7 @@ export function GroupActivitiesTable(props: Props) {
     useEffect(() => {
         // Set loading to false when data is available or an error occurs
         if (!isLoading) {
+
             setLoading(false);
         }
     }, [isLoading]);
@@ -202,6 +203,7 @@ export function GroupActivitiesTable(props: Props) {
 
             // Hide the form after submission
             // setFormVisible(false);
+            await refetch();
             setFormData({beneficiaryId: "", name: '', code: '', directIndirect: '', sex: '', age: ''}); // Reset form data
             setMessage('Data successfully saved!');
             setIsError(false);
@@ -492,7 +494,8 @@ export function GroupActivitiesTable(props: Props) {
                 </div>
             ) : (
                 <>
-                    {!formVisible && <div className="table-responsive">
+                    {!formVisible && <>
+                        <div className="table-responsive">
                         <table className="table table-striped table-bordered table-hover table-dark-header">
                             <thead className="text-nowrap">
                             <tr>
@@ -506,7 +509,7 @@ export function GroupActivitiesTable(props: Props) {
                             </thead>
                             <tbody>{renderTableRows()}</tbody>
                         </table>
-                    </div>}
+                    </div>
 
                     {/* Pagination Controls */}
                     <div className="pagination-controls mt-3">
@@ -526,6 +529,7 @@ export function GroupActivitiesTable(props: Props) {
                             Next
                         </button>
                     </div>
+                    </>}
                     {/*/!* Show table only if form is not visible *!/*/}
                     {/*{!formVisible && <Table table={table} />}*/}
                     {/*{!formVisible && <TablePagination table={table} />}*/}

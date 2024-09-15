@@ -28,7 +28,7 @@ export function OrgUnitDetails() {
 function Table(props: { orgUnitId: string }) {
   const { data } = useOrgUnitDetails(props.orgUnitId);
 
-  if (data === undefined) return null;
+  // if (data === undefined) return null;
 
-  return <OrgUnitTable orgUnitDetails={data} orgUnitId={props.orgUnitId} />;
+  return <OrgUnitTable orgUnitDetails={data || []} orgUnitId={props.orgUnitId} />;
 }

@@ -18,8 +18,8 @@ type Props = {
 };
 
 export function OrgUnitTable(props: Props) {
-    const {data, isLoading} = useOrgUnitDetails(props.orgUnitId); //fetch data
     const [loading, setLoading] = useState(true); //fetching data
+    const {data, isLoading, refetch} = useOrgUnitDetails(props.orgUnitId); //fetch data
     const credentials = btoa(`Skununka:Nomisr123$$$$}`);
     const [search, setSearch] = useState('');
     const history = useHistory();
@@ -49,12 +49,12 @@ export function OrgUnitTable(props: Props) {
     const [isError, setIsError] = useState(false); // State to track if the message is an error
     const [saving, setSaving] = useState(false); //loader for saving entry
     const [orgUnitCode, setOrgUnitcode] = useState('');
-    const table = useTable({
-        data: props.orgUnitDetails,
-        columns: orgUnitDetailsColumns(credentials, setMessage, setIsError),
-        globalFilter: search,
-        setGlobalFilter: setSearch,
-    });
+    // const table = useTable({
+    //     data: props.orgUnitDetails,
+    //     columns: orgUnitDetailsColumns(credentials, setMessage, setIsError),
+    //     globalFilter: search,
+    //     setGlobalFilter: setSearch,
+    // });
 
     useEffect(() => {
         // Set loading to false when data is available or an error occurs
@@ -328,6 +328,7 @@ export function OrgUnitTable(props: Props) {
                 throw new Error('Failed to post data');
             }
 
+            await refetch();
             // Hide the form after submission
             setFormData({
                 name: '',
@@ -364,10 +365,10 @@ export function OrgUnitTable(props: Props) {
     const rowsPerPage = 10; // You can make this dynamic if needed
 
     // Calculate the total number of pages
-    const totalPages = Math.ceil(data.length / rowsPerPage);
+    const totalPages = Math.ceil(data?.length / rowsPerPage);
 
     // Get the data to display on the current page
-    const paginatedData = data.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+    const paginatedData = data?.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
 
     const renderTableRows = () => {
@@ -624,7 +625,7 @@ export function OrgUnitTable(props: Props) {
                 </div>
             ) : (
                 <>
-                    {!formVisible && <div className="table-responsive">
+                    {!formVisible && <><div className="table-responsive">
                         <table className="table table-striped table-bordered table-hover table-dark-header">
                             <thead className="text-nowrap">
                             <tr>
@@ -642,7 +643,7 @@ export function OrgUnitTable(props: Props) {
                             </thead>
                             <tbody>{renderTableRows()}</tbody>
                         </table>
-                    </div>}
+                    </div>
 
                     {/* Pagination Controls */}
                     <div className="pagination-controls mt-3">
@@ -662,6 +663,7 @@ export function OrgUnitTable(props: Props) {
                             Next
                         </button>
                     </div>
+                    </>}
                 </>
             )}
 
