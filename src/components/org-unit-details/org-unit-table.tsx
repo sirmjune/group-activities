@@ -331,7 +331,7 @@ export function OrgUnitTable(props: Props) {
             await refetch();
             // Hide the form after submission
             setFormData({
-                name: '',
+                name: 'ROM',
                 code: '',
                 groupType: '',
                 other: '',

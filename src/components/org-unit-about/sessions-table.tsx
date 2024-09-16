@@ -26,10 +26,11 @@ export function SessionsTable(props: Props) {
     const [searchCode, setSearchCode] = useState('');
     const [formVisible, setFormVisible] = useState(false);
     const codes = props.data.map((item) => item.code);
-    const [loading, setLoading] = useState(false);
-
+    const [saving, setSaving] = useState(false);
+    const [trigger, setTrigger] = useState(0);
     const [formData, setFormData] = useState({
-        code: codes.length > 0 ? codes[0] : '',
+        // code: codes.length > 0 ? codes[0] : '',
+        code: '',
         session: '',
         sessionDate: ''
     }); // Add initial form data
@@ -42,14 +43,24 @@ export function SessionsTable(props: Props) {
         globalFilter: search,
         setGlobalFilter: setSearch,
     });
+    const [loading, setLoading] = useState(true);
 
-    const {data:beneficiaryData} = useOrgUnitAbout(props.detailsId);
+
+    const {data:beneficiaryData, isLoading, refetch} = useOrgUnitAbout(props.detailsId);
     // console.log("benef", beneficiaryData?.groupActivities);
+
 
     const filteredData = beneficiaryData?.groupActivities.filter(item =>
         item.code.toLowerCase().includes(searchCode.toLowerCase())
     );
 
+    useEffect(() => {
+        // Set loading to false when data is available or an error occurs
+        if (!isLoading) {
+
+            setLoading(false);
+        }
+    }, [isLoading]);
 
     useEffect(() => {
         const matchedElement = data?.find(item => item.id === props.detailsId);
@@ -65,6 +76,15 @@ export function SessionsTable(props: Props) {
         }
     }, [session]);
 
+//set code
+    useEffect(() => {
+        if (filteredData?.length > 0) {
+            setFormData((prevData) => ({
+                ...prevData,
+                code: filteredData[0].code // Example: Set to the first item's code
+            }));
+        }
+    }, [session,trigger]);
 
     // Options for the "Sub Group" dropdown based on the "Group Type"
     const getSessionOptions = () => {
@@ -285,7 +305,6 @@ export function SessionsTable(props: Props) {
         setFormData((prevData) => ({...prevData, [name]: value}));
     }
 
-
     // Function to fetch a new ID from the endpoint
     const fetchNewId = async () => {
         try {
@@ -310,12 +329,12 @@ export function SessionsTable(props: Props) {
     async function handleFormSubmit(event: React.FormEvent) {
         event.preventDefault();
         // console.log("formData", formData)
-        setLoading(true);
+        setSaving(true);
 
         const newId = await fetchNewId();
         if (!newId) {
             console.error('Failed to generate a new event ID');
-            setLoading(false);
+            setSaving(false);
             setMessage('Failed to generate a new event ID.');
             return;
         }
@@ -337,7 +356,6 @@ export function SessionsTable(props: Props) {
             ]
         }
 
-
         try {
             const response = await fetch(
                 `${process.env.REACT_APP_BASE_URL}/ovc/api/events?`,
@@ -357,17 +375,79 @@ export function SessionsTable(props: Props) {
 
             // Hide the form after submission
             // setFormVisible(false);
+            await refetch();
             setFormData({code: "", session: "", sessionDate: ""}); // Reset form data
             setSelectedDate('');
             setMessage('Data successfully saved!');
             setIsError(false);
+            setTrigger(prevTrigger => prevTrigger + 1);
         } catch (error) {
             console.error('Error posting data:', error);
             setMessage('Error saving data. Please try again.');
             setIsError(true);
         }
-        setLoading(false);
+        setSaving(false);
     }
+
+
+
+    //pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const rowsPerPage = 10; // You can make this dynamic if needed
+    const sessions = beneficiaryData?.sessions || [];
+
+    // Calculate the total number of pages
+    const totalPages = Math.ceil(sessions.length / rowsPerPage);
+
+    // Get the data to display on the current page
+    const paginatedData = sessions.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+    const renderTableRows = () => {
+
+        const sessionData = beneficiaryData?.sessions;
+        // console.log("data", sessionData);
+
+        if (!sessionData || sessionData.length === 0) {
+            return (
+                <tr>
+                    <td colSpan={13}>No data available for Session, Please add new Session Data</td>
+                </tr>
+            );
+        }
+
+        return paginatedData.map((session, index) => {
+        // return sessionData.map((session, index) => {
+
+            return (
+                <tr key={session.id || index}>
+                    <td>{session.code}</td>
+                    <td>{session.age}</td>
+                    <td>{session.sex}</td>
+                    <td>{session.sessions[0]}</td>
+                    <td>{session.sessions[1]}</td>
+                    <td>{session.sessions[2]}</td>
+                    <td>{session.sessions[3]}</td>
+                    <td>{session.sessions[4]}</td>
+                    <td>{session.sessions[5]}</td>
+                    <td>{session.sessions[6]}</td>
+                    <td>{session.sessions[7]}</td>
+                    <td>{session.sessions[8]}</td>
+                    <td>{session.sessions[9]}</td>
+                </tr>
+            );
+        });
+    };
+
+    const handlePreviousPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
 
     return (
         <main className="space-y-4">
@@ -383,7 +463,7 @@ export function SessionsTable(props: Props) {
                     </Link>
                 }
             />
-            {loading && <div className="mt-4">
+            {saving && <div className="mt-4">
                 <div className="loader-container">
                     <div className="spinner"></div>
                     <p>Saving Entry...</p>
@@ -419,11 +499,11 @@ export function SessionsTable(props: Props) {
                                 className="mt-1 block w-full border border-gray-300 rounded-md p-2"
                                 required
                             >
-                                {filteredData.length === 0 ? (
+                                {filteredData?.length === 0 ? (
                                     <option value="">No beneficiaries found</option>
                                 ) : (
-                                    filteredData.map((item, index) => (
-                                        <option key={index} value={item.code}>
+                                    filteredData?.map((item, index) => (
+                                        <option key={item.code} value={item.code}>
                                             {`${item.code} - ${item.name}`}
                                         </option>
                                     ))
@@ -481,8 +561,67 @@ export function SessionsTable(props: Props) {
                     </form>
                 </div>
             )}
-            {!formVisible && <Table table={table}/>}
-            {!formVisible && <TablePagination table={table}/>}
+
+
+
+            {loading ? (
+                <div className="mt-4">
+                    <div className="loader-container">
+                        <div className="spinner"></div>
+                        <p>Loading data, please wait...</p>
+                    </div>
+                </div>
+            ) : (
+                <>
+                    {!formVisible && <>
+                        <div className="table-responsive">
+                            <table className="table table-striped table-bordered table-hover table-dark-header">
+                                <thead className="text-nowrap">
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Age</th>
+                                    <th>Sex</th>
+                                    <th>Session 1 Name</th>
+                                    <th>Session 1 Date</th>
+                                    <th>Session 2 Name</th>
+                                    <th>Session 2 Date</th>
+                                    <th>Session 3 Name</th>
+                                    <th>Session 3 Date</th>
+                                    <th>Session 4 Name</th>
+                                    <th>Session 4 Date</th>
+                                    <th>Session 5 Name</th>
+                                    <th>Session 5 Date</th>
+                                </tr>
+                                </thead>
+                                <tbody>{renderTableRows()}</tbody>
+                            </table>
+                        </div>
+
+                         {/*Pagination Controls*/}
+                        <div className="pagination-controls mt-3">
+                            <button
+                                className="btn btn-primary me-2"
+                                onClick={handlePreviousPage}
+                                disabled={currentPage === 1}
+                            >
+                                Previous
+                            </button>
+                            <span>Page {currentPage} of {totalPages}</span>
+                            <button
+                                className="btn btn-primary ms-2"
+                                onClick={handleNextPage}
+                                disabled={currentPage === totalPages}
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </>}
+                    {/*/!* Show table only if form is not visible *!/*/}
+                    {/*{!formVisible && <Table table={table} />}*/}
+                    {/*{!formVisible && <TablePagination table={table} />}*/}
+                </>
+            )}
+
         </main>
     );
 }
