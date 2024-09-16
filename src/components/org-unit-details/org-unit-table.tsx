@@ -1,11 +1,13 @@
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { saveAs } from 'file-saver';
 
-import {Header} from '../header';
-import {Table, TablePagination} from '../common/table';
-import {orgUnitDetailsColumns} from '../../table/org-unit-details';
-import {OrgUnitDetails} from '../../types/org-unit-details';
-import {useTable} from '../../hooks/use-table';
-import {useHistory} from 'react-router-dom';
+import { Header } from '../header';
+import { Table, TablePagination } from '../common/table';
+import { orgUnitDetailsColumns } from '../../table/org-unit-details';
+import { OrgUnitDetails } from '../../types/org-unit-details';
+import { useTable } from '../../hooks/use-table';
+import { useHistory } from 'react-router-dom';
 import React from 'react';
 import '../org-unit-about/form-styles.css';
 
@@ -57,43 +59,43 @@ export function OrgUnitTable(props: Props) {
         switch (formData.groupType) {
             case '1. VSLA Group':
                 return [
-                    {value: 'Group VSLA methodology sessions ', label: 'Group VSLA methodology sessions'},
-                    {value: 'VSLA monitoring & Support supervision ', label: 'VSLA monitoring & Support supervision'},
-                    {value: 'VSLA saving and borrowing ', label: 'VSLA saving and borrowing'},
-                    {value: 'VSLA TOT/ Refresher', label: 'VSLA TOT/ Refresher'},
-                    {value: 'Financial Literacy', label: 'Financial Literacy'},
-                    {value: 'Bank Linkages', label: 'Bank Linkages'},
-                    {value: 'SPM Training Sessions', label: 'SPM Training Sessions'}
+                    { value: 'Group VSLA methodology sessions ', label: 'Group VSLA methodology sessions' },
+                    { value: 'VSLA monitoring & Support supervision ', label: 'VSLA monitoring & Support supervision' },
+                    { value: 'VSLA saving and borrowing ', label: 'VSLA saving and borrowing' },
+                    { value: 'VSLA TOT/ Refresher', label: 'VSLA TOT/ Refresher' },
+                    { value: 'Financial Literacy', label: 'Financial Literacy' },
+                    { value: 'Bank Linkages', label: 'Bank Linkages' },
+                    { value: 'SPM Training Sessions', label: 'SPM Training Sessions' }
                 ];
             case '2. Sinovuyo':
                 return [
-                    {value: 'SINOVUYO SESSIONS ', label: 'SINOVUYO SESSIONS '},
+                    { value: 'SINOVUYO SESSIONS ', label: 'SINOVUYO SESSIONS ' },
                 ];
             case '3. ECD':
                 return [
-                    {value: 'Early Childhood Development Sessions', label: 'Early Childhood Development Sessions'}
+                    { value: 'Early Childhood Development Sessions', label: 'Early Childhood Development Sessions' }
                 ];
             case '4. AFLATEEN':
                 return [
-                    {value: 'AFLATEEN ', label: 'AFLATEEN '},
+                    { value: 'AFLATEEN ', label: 'AFLATEEN ' },
                 ];
             case '5. NMN':
                 return [
-                    {value: 'No means No sessions (Boys)', label: 'No means No sessions (Boys)'},
-                    {value: 'No means No sessions (Girls)', label: 'No means No sessions (Girls)'}
+                    { value: 'No means No sessions (Boys)', label: 'No means No sessions (Boys)' },
+                    { value: 'No means No sessions (Girls)', label: 'No means No sessions (Girls)' }
                 ];
             case '6. Financial Literacy':
                 return [
-                    {value: 'Financial Literacy', label: 'Financial Literacy'},
+                    { value: 'Financial Literacy', label: 'Financial Literacy' },
 
                 ];
             case '7. SPM':
                 return [
-                    {value: 'SPM Training Sessions', label: 'SPM Training Sessions'}
+                    { value: 'SPM Training Sessions', label: 'SPM Training Sessions' }
                 ];
             case '8. Work Readiness':
                 return [
-                    {value: 'Work Readiness Assessment', label: 'Work Readiness Assessment'}
+                    { value: 'Work Readiness Assessment', label: 'Work Readiness Assessment' }
                 ];
             default:
                 return [];
@@ -258,33 +260,33 @@ export function OrgUnitTable(props: Props) {
             inactive: false,
             featureType: "NONE",
             lastUpdatedByUserInfo:
-                {
-                    uid: userData.id,
-                    firstName: userData.firstName,
-                    surname: userData.surname,
-                    username: userData.username
-                },
+            {
+                uid: userData.id,
+                firstName: userData.firstName,
+                surname: userData.surname,
+                username: userData.username
+            },
             createdByUserInfo:
-                {
-                    uid: userData.id,
-                    firstName: userData.firstName,
-                    surname: userData.surname,
-                    username: userData.username
-                },
+            {
+                uid: userData.id,
+                firstName: userData.firstName,
+                surname: userData.surname,
+                username: userData.username
+            },
             programOwners: [],
             relationships: [],
 
             attributes: [
-                {attribute: 'Ah4eyDOBf51', value: formData.name},
-                {attribute: 'D7wRx9mgwns', value: formData.venue},
-                {attribute: 'Pll79WEVWHj', value: formData.description},
-                {attribute: 'VyACOoRKcCA', value: formData.activityCode},
-                {attribute: 'b76aEJUPnLy', value: selectedDate},
-                {attribute: 'bFnIjGJpf9t', value: formData.groupType},
-                {attribute: 'cYDK0qZSri9', value: formData.other},
-                {attribute: 'dqbuxC5GB1M', value: formData.activity},
-                {attribute: 'mWyp85xIzXR', value: formData.subGroup},
-                {attribute: 'oqabsHE0ZUI', value: formData.code}
+                { attribute: 'Ah4eyDOBf51', value: formData.name },
+                { attribute: 'D7wRx9mgwns', value: formData.venue },
+                { attribute: 'Pll79WEVWHj', value: formData.description },
+                { attribute: 'VyACOoRKcCA', value: formData.activityCode },
+                { attribute: 'b76aEJUPnLy', value: selectedDate },
+                { attribute: 'bFnIjGJpf9t', value: formData.groupType },
+                { attribute: 'cYDK0qZSri9', value: formData.other },
+                { attribute: 'dqbuxC5GB1M', value: formData.activity },
+                { attribute: 'mWyp85xIzXR', value: formData.subGroup },
+                { attribute: 'oqabsHE0ZUI', value: formData.code }
             ],
             enrollments: [
                 {
@@ -340,25 +342,70 @@ export function OrgUnitTable(props: Props) {
     }
 
     function handleInputChange(event) {
-        const {name, value} = event.target;
-        setFormData((prevData) => ({...prevData, [name]: value}));
+        const { name, value } = event.target;
+        setFormData((prevData) => ({ ...prevData, [name]: value }));
     }
 
-    const handleDownloadCSV = () => {
+    // Function to convert JSON to CSV
+    const jsonToCSV = (data) => {
+        const csvRows = [];
 
-    }
+        // Get headers
+        const headers = Object.keys(data[0]);
+        csvRows.push(headers.join(',')); // Join headers with a comma
+
+        // Loop over rows and map data
+        for (const row of data) {
+            const values = headers.map(header => {
+                const escaped = ('' + row[header]).replace(/"/g, '\\"');
+                return `"${escaped}"`; // Escape quotes in values
+            });
+            csvRows.push(values.join(',')); // Join each row with commas
+        }
+
+        return csvRows.join('\n');
+    };
+
+    // Handle the download button click
+    const handleDownloadCSV = async () => {
+        try {
+            // Fetch data from all three endpoints
+            const [orgUnitsRes, groupActivityRes, sessionsRes] = await Promise.all([
+                axios.post('http://localhost:3001/organisationUnits', { location: 'bukesa' }),
+                axios.post('http://localhost:3001/groupActivity', { instanceId: 'TNPKjBNN2gy' }),
+                axios.get('http://localhost:3001/sessions', { params: { instanceId: 'TNPKjBNN2gy' } })
+            ]);
+
+            // Combine data from all responses (you can modify this to suit your data structure)
+            const mergedData = [
+                ...orgUnitsRes.data,
+                ...groupActivityRes.data,
+                ...sessionsRes.data
+            ];
+
+            // Convert merged data to CSV
+            const csv = jsonToCSV(mergedData);
+
+            // Create a blob and trigger download
+            const blob = new Blob([csv], { type: 'text/csv' });
+            saveAs(blob, 'merged_data.csv');
+
+        } catch (error) {
+            console.error('Error fetching data or generating CSV:', error);
+        }
+    };
 
 
     return (
         <main className="space-y-4">
-            <Header 
-                onAdd={onAdd} 
-                search={search} 
+            <Header
+                onAdd={onAdd}
+                search={search}
                 onSearch={setSearch}
                 onDownloadCSV={handleDownloadCSV} // Pass the download handler    
             />
 
-            
+
             {/*looader for saving entry*/}
             {loading && <div className="mt-4">
                 <div className="loader-container">
@@ -547,7 +594,7 @@ export function OrgUnitTable(props: Props) {
                     history.push(`/${props.orgUnitId}/${id}/about`);
                 }}
             />}
-            {!formVisible && <TablePagination table={table}/>}
+            {!formVisible && <TablePagination table={table} />}
         </main>
     );
 }
