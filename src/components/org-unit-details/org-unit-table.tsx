@@ -346,54 +346,63 @@ export function OrgUnitTable(props: Props) {
         setFormData((prevData) => ({ ...prevData, [name]: value }));
     }
 
-    // Function to convert JSON to CSV
-    const jsonToCSV = (data) => {
-        const csvRows = [];
 
-        // Get headers
-        const headers = Object.keys(data[0]);
-        csvRows.push(headers.join(',')); // Join headers with a comma
-
-        // Loop over rows and map data
-        for (const row of data) {
-            const values = headers.map(header => {
-                const escaped = ('' + row[header]).replace(/"/g, '\\"');
-                return `"${escaped}"`; // Escape quotes in values
-            });
-            csvRows.push(values.join(',')); // Join each row with commas
+    // Function to convert the array of arrays (rows) to CSV
+    const jsonToCSV = (rows) => {
+        if (!rows || !Array.isArray(rows) || rows.length === 0) {
+            throw new Error('No valid data available to convert to CSV');
         }
 
-        return csvRows.join('\n');
+        const csvRows = [];
+
+        // Extract headers from the first row (if applicable)
+        const headers = rows[0]; // First array in 'rows' assumed to be headers
+        csvRows.push(headers.join(',')); // Join headers with commas
+
+        // Process the remaining rows (data)
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            const csvRow = row.map(value => {
+                const escaped = ('' + value).replace(/"/g, '\\"'); // Escape quotes in values
+                return `"${escaped}"`; // Wrap each value in quotes
+            });
+            csvRows.push(csvRow.join(',')); // Join each row's values with commas
+        }
+
+        return csvRows.join('\n'); // Join all rows with a new line character
     };
 
     // Handle the download button click
-    const handleDownloadCSV = async () => {
+    const handleDownloadCSV = async (orgUnitId) => {
         try {
-            // Fetch data from all three endpoints
-            const [orgUnitsRes, groupActivityRes, sessionsRes] = await Promise.all([
-                axios.post('http://localhost:3001/organisationUnits', { location: 'bukesa' }),
-                axios.post('http://localhost:3001/groupActivity', { instanceId: 'TNPKjBNN2gy' }),
-                axios.get('http://localhost:3001/sessions', { params: { instanceId: 'TNPKjBNN2gy' } })
-            ]);
+            // Send a POST request with orgUnitId in the body
+            const response = await axios.post('http://localhost:3001/trackedEntityInstances', {
+                orgUnitId: orgUnitId // Sending orgUnitId in the body
+            });
 
-            // Combine data from all responses (you can modify this to suit your data structure)
-            const mergedData = [
-                ...orgUnitsRes.data,
-                ...groupActivityRes.data,
-                ...sessionsRes.data
-            ];
+            // Log the API response for debugging
+            console.log('API Response:', response.data);
 
-            // Convert merged data to CSV
-            const csv = jsonToCSV(mergedData);
+            // Extract rows from the response
+            const rows = response.data.rows;
+
+            if (!rows || !Array.isArray(rows) || rows.length === 0) {
+                throw new Error('API returned invalid or empty data');
+            }
+
+            // Convert rows to CSV format
+            const csv = jsonToCSV(rows);
 
             // Create a blob and trigger download
             const blob = new Blob([csv], { type: 'text/csv' });
-            saveAs(blob, 'merged_data.csv');
+            saveAs(blob, 'tracked_entity_instances.csv'); // Change the name as needed
 
         } catch (error) {
             console.error('Error fetching data or generating CSV:', error);
         }
     };
+
+
 
 
     return (
@@ -402,7 +411,7 @@ export function OrgUnitTable(props: Props) {
                 onAdd={onAdd}
                 search={search}
                 onSearch={setSearch}
-                onDownloadCSV={handleDownloadCSV} // Pass the download handler    
+                onDownloadCSV={() => handleDownloadCSV('TNPKjBNN2gy')} // Pass the download handler    
             />
 
 
