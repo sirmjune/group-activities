@@ -7,6 +7,7 @@ import {useTable} from '../../hooks/use-table';
 import {Session} from '../../types/org-unit-about';
 import {sessionsColumns} from '../../table/sessions';
 import {useOrgUnitDetails} from "../../hooks/use-org-unit-details";
+import {useOrgUnitAbout} from "../../hooks/use-org-unit-about";
 
 
 type Props = {
@@ -18,15 +19,10 @@ type Props = {
 export function SessionsTable(props: Props) {
     const credentials = btoa(`Skununka:Nomisr123$$$$}`);
     const [search, setSearch] = useState('');
-    console.log("sessionsTable", props.data);
 
     // for setting sessions dropdown
     const {data} = useOrgUnitDetails(props.orgUnitId);
     const [session, setSession] = useState('');
-
-    console.log("data", data);
-
-
     const [searchCode, setSearchCode] = useState('');
     const [formVisible, setFormVisible] = useState(false);
     const codes = props.data.map((item) => item.code);
@@ -47,13 +43,16 @@ export function SessionsTable(props: Props) {
         setGlobalFilter: setSearch,
     });
 
-    const filteredData = props.data.filter(item =>
+    const {data:beneficiaryData} = useOrgUnitAbout(props.detailsId);
+    // console.log("benef", beneficiaryData?.groupActivities);
+
+    const filteredData = beneficiaryData?.groupActivities.filter(item =>
         item.code.toLowerCase().includes(searchCode.toLowerCase())
     );
 
 
     useEffect(() => {
-        const matchedElement = data.find(item => item.id === props.detailsId);
+        const matchedElement = data?.find(item => item.id === props.detailsId);
         if (matchedElement && matchedElement.subGroup) {
             setSession(matchedElement.subGroup);
         }
@@ -69,7 +68,7 @@ export function SessionsTable(props: Props) {
 
     // Options for the "Sub Group" dropdown based on the "Group Type"
     const getSessionOptions = () => {
-        switch (formData.session) {
+        switch (session) {
             case 'Group VSLA methodology sessions':
                 return [
                     {value: '1.Group formation and General Assembly', label: '1.Group formation and General Assembly'},
@@ -421,7 +420,7 @@ export function SessionsTable(props: Props) {
                                 required
                             >
                                 {filteredData.length === 0 ? (
-                                    <option value="">No matching codes found</option>
+                                    <option value="">No beneficiaries found</option>
                                 ) : (
                                     filteredData.map((item, index) => (
                                         <option key={index} value={item.code}>
@@ -429,39 +428,8 @@ export function SessionsTable(props: Props) {
                                         </option>
                                     ))
                                 )}
-
-                                {/*{props.data.length === 0 ? (*/}
-                                {/*    <option value="">Add a beneficiary</option>*/}
-                                {/*) : (*/}
-                                {/*    props.data.map((item, index) => (*/}
-                                {/*        <option key={index} value={item.code}>*/}
-                                {/*            {`${item.code} - ${item.name}`}*/}
-                                {/*        </option>*/}
-                                {/*    ))*/}
-                                {/*)}*/}
-
-                                {/*{codes.length === 0 ? (*/}
-                                {/*    <option value="">Add a beneficiary</option>*/}
-                                {/*) : (*/}
-                                {/*    filteredCodes.map((code, index) => (*/}
-                                {/*        <option key={index} value={code}>*/}
-                                {/*            {code}*/}
-                                {/*        </option>*/}
-                                {/*    ))*/}
-                                {/*)}*/}
                             </select>
                         </div>
-                        {/*<div>*/}
-                        {/*    <label className="block text-sm font-medium text-gray-700"> Code</label>*/}
-                        {/*    <select name="code" value={formData.code} onChange={handleInputChange}>*/}
-                        {/*        {codes.map((code, index) => (*/}
-                        {/*            <option key={index} value={code}>*/}
-                        {/*                {code}*/}
-                        {/*            </option>*/}
-                        {/*        ))}*/}
-                        {/*    </select>*/}
-                        {/*</div>*/}
-
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Session</label>
